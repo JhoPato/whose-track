@@ -61,7 +61,7 @@ button{font:inherit}
 :focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 
 .wrap{
-  max-width:1120px;margin:0 auto;
+  max-width:680px;margin:0 auto;
   padding-block:calc(env(safe-area-inset-top,0px) + 18px) calc(env(safe-area-inset-bottom,0px) + 56px);
   padding-left:max(16px,env(safe-area-inset-left,0px));
   padding-right:max(16px,env(safe-area-inset-right,0px));
@@ -112,7 +112,7 @@ input::placeholder,textarea::placeholder{color:var(--ink-soft);opacity:.8}
 .msg.err{color:var(--bad);font-weight:700}
 
 /* ---------- home ---------- */
-.home{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:48px;align-items:center;padding-block:7vh 0}
+.home{display:grid;grid-template-columns:minmax(0,1fr);gap:28px;align-items:start;padding-block:3vh 0}
 .hero h1{font-family:var(--font-display);font-weight:400;font-size:clamp(54px,9.5vw,112px);line-height:.9;color:var(--paper);letter-spacing:.005em}
 .hero h1 span{display:block;color:var(--accent)}
 .tagline{font-size:clamp(18px,2.3vw,22px);max-width:32ch;margin:18px 0 28px;color:var(--on-desk)}
@@ -128,14 +128,14 @@ input::placeholder,textarea::placeholder{color:var(--ink-soft);opacity:.8}
 .fineprint{margin-top:22px;font-size:13px;color:var(--on-desk-soft);max-width:60ch}
 
 /* ---------- top bar ---------- */
-.bar{display:flex;align-items:center;gap:14px 18px;flex-wrap:wrap;margin-bottom:20px}
+.bar{display:flex;align-items:center;gap:10px 12px;flex-wrap:wrap;margin-bottom:20px}
 .bar .grow{flex:1}
 .roomchip{display:flex;align-items:center;gap:10px;background:var(--desk-deep);border:2px solid var(--desk-edge);border-radius:10px;padding:6px 8px 6px 12px}
 .roomchip .lbl{color:var(--on-desk-soft)}
 .roomchip strong{font:700 20px/1 var(--font-mono);letter-spacing:.18em;color:var(--accent)}
 
 /* ---------- lobby ---------- */
-.lobby-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:22px;align-items:start}
+.lobby-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:18px;align-items:start}
 .side{display:grid;gap:22px;min-width:0}
 .tape-card .intro{color:var(--ink-soft);font-size:14px;margin:4px 0 14px}
 .addrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px}
@@ -185,23 +185,23 @@ kbd{font:600 12px/1 var(--font-mono);background:var(--paper-shade);border:1px so
 .timebar{height:6px;border-radius:3px;background:var(--desk-deep);overflow:hidden;margin:-6px 0 20px}
 .timebar i{display:block;height:100%;width:100%;background:var(--accent);transform-origin:left;transition:transform .2s linear}
 
-.game-grid{display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);gap:22px;align-items:start}
+.game-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;align-items:start}
 .deck{display:grid;gap:14px;min-width:0}
-.cassette{background:var(--shell);border:3px solid var(--desk-edge);border-radius:16px;padding:16px 16px 0;box-shadow:0 14px 34px rgba(4,7,40,.45)}
+.cassette{background:var(--shell);border:3px solid var(--desk-edge);border-radius:16px;padding:14px;box-shadow:0 14px 34px rgba(4,7,40,.45)}
 .cass-label{position:relative;background:var(--paper);color:var(--ink);border-radius:6px;padding:12px 14px 14px;
   background-image:linear-gradient(to bottom,var(--c,var(--accent)) 0 6px,transparent 6px 8px,var(--c,var(--accent)) 8px 12px,transparent 12px),repeating-linear-gradient(to bottom,transparent 0 29px,var(--rule) 29px 30px);
-  background-position:0 0,0 14px;padding-top:24px;min-height:150px}
+  background-position:0 0,0 14px;padding-top:24px;min-height:0}
 .cass-label .side{position:absolute;top:22px;right:12px;font:400 30px/1 var(--font-display);color:var(--ink)}
 .cass-meta{display:grid;grid-template-columns:64px minmax(0,1fr);gap:12px;align-items:center;padding-right:34px}
 .cass-meta img,.cass-meta .ph{width:64px;height:64px;border-radius:4px;object-fit:cover;background:var(--paper-shade);border:2px solid var(--ink)}
 #track-title{font-family:var(--font-hand);font-weight:700;font-size:clamp(22px,3vw,28px);line-height:1.15;overflow-wrap:anywhere}
 .cass-of{font:500 12px/1 var(--font-mono);color:var(--ink-soft);margin-top:8px}
-.cass-window{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:14px auto 0;max-width:280px;height:62px;background:var(--desk-deep);border:3px solid var(--desk-edge);border-radius:31px;padding:0 10px}
+.cass-window{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:12px auto 0;max-width:240px;height:50px;background:var(--desk-deep);border:3px solid var(--desk-edge);border-radius:31px;padding:0 10px}
 .cass-window .band{flex:1;height:16px;border-radius:8px;background:linear-gradient(to bottom,#2a1d12,#4a3220 50%,#2a1d12)}
-.reel{width:44px;height:44px;flex:none}
+.reel{width:36px;height:36px;flex:none}
 .spinning .reel{animation:spin 1.8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.cass-foot{height:28px;margin:12px 48px 0;border:3px solid var(--desk-edge);border-bottom:0;border-radius:10px 10px 0 0}
+.cass-foot{display:none;height:28px;margin:12px 48px 0;border:3px solid var(--desk-edge);border-bottom:0;border-radius:10px 10px 0 0}
 .player-box{background:var(--desk-deep);border:2px solid var(--desk-edge);border-radius:var(--radius);padding:12px}
 #sp-slot{min-height:80px;border-radius:12px;overflow:hidden}
 #sp-slot iframe{display:block;border-radius:12px}
@@ -253,7 +253,7 @@ kbd{font:600 12px/1 var(--font-mono);background:var(--paper-shade);border:1px so
 #next-wait,#again-wait{margin-top:12px;font-size:14px;color:var(--ink-soft)}
 
 /* ---------- end ---------- */
-.end-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:22px;align-items:start}
+.end-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:18px;align-items:start}
 .end-title{font-family:var(--font-display);font-weight:400;font-size:clamp(44px,8vw,88px);line-height:.92;color:var(--paper);margin:8px 0 22px}
 .end-title span{display:block;color:var(--accent)}
 .podium{list-style:none;margin:0;padding:0;display:grid;gap:10px}
@@ -386,11 +386,11 @@ kbd{font:600 12px/1 var(--font-mono);background:var(--paper-shade);border:1px so
 <main class="wrap" data-screen="lobby" hidden>
   <header class="bar">
     <span class="logo"><svg aria-hidden="true"><use href="#i-cass"/></svg>Whose <b>Track?</b></span>
+    <div class="langsw" role="group" data-i18n-aria="lang.group"><button type="button" data-lang="en">EN</button><button type="button" data-lang="pt">PT</button></div>
     <span class="grow"></span>
     <div class="roomchip"><span class="lbl" data-i18n="bar.room"></span><strong id="room-code">-----</strong>
       <button class="btn small" id="copy-link" data-i18n="bar.copy"></button></div>
     <button class="btn ghost small" id="leave-lobby" data-i18n="bar.leave"></button>
-    <div class="langsw" role="group" data-i18n-aria="lang.group"><button type="button" data-lang="en">EN</button><button type="button" data-lang="pt">PT</button></div>
   </header>
 
   <div class="lobby-grid">
@@ -405,11 +405,7 @@ kbd{font:600 12px/1 var(--font-mono);background:var(--paper-shade);border:1px so
       </div>
       <div id="tape-on" class="spc" hidden>
         <p class="connected"><span class="spdot" aria-hidden="true"></span><span id="tape-on-text"></span></p>
-        <p class="spc-note" id="tape-mix"></p>
-        <details class="mysongs">
-          <summary data-i18n="tape.see"></summary>
-          <ol class="songs" id="song-list"></ol>
-        </details>
+        <p class="spc-note" data-i18n="tape.secret"></p>
         <div class="tape-foot">
           <a class="linkbtn sp-link" id="sp-refresh" href="#" target="_blank" data-i18n="spc.refresh"></a>
           <button class="linkbtn" id="sp-disconnect" type="button" data-i18n="spc.disconnect"></button>
@@ -481,10 +477,10 @@ kbd{font:600 12px/1 var(--font-mono);background:var(--paper-shade);border:1px so
 <main class="wrap" data-screen="game" hidden>
   <header class="bar">
     <span class="logo"><svg aria-hidden="true"><use href="#i-cass"/></svg>Whose <b>Track?</b></span>
+    <div class="langsw" role="group" data-i18n-aria="lang.group"><button type="button" data-lang="en">EN</button><button type="button" data-lang="pt">PT</button></div>
     <span class="grow"></span>
     <div class="sidelabel"><span id="side-text"></span><small id="round-of"></small></div>
     <div class="counter" id="counter" role="timer" data-i18n-aria="game.timer"><span>0</span><span>3</span><span>0</span></div>
-    <div class="langsw" role="group" data-i18n-aria="lang.group"><button type="button" data-lang="en">EN</button><button type="button" data-lang="pt">PT</button></div>
   </header>
   <div class="timebar"><i id="timebar-fill"></i></div>
 
@@ -519,7 +515,6 @@ kbd{font:600 12px/1 var(--font-mono);background:var(--paper-shade);border:1px so
     <section class="card play-card">
       <div class="stripe" style="--c:var(--me)"></div>
       <div id="round-panel">
-        <p class="note" id="mine-note" data-i18n="game.mine" hidden></p>
         <h2 data-i18n="game.q"></h2>
         <p class="sub" data-i18n="game.sub"></p>
         <div class="pick-grid" id="pick-grid"></div>
@@ -548,8 +543,8 @@ kbd{font:600 12px/1 var(--font-mono);background:var(--paper-shade);border:1px so
 <main class="wrap" data-screen="end" hidden>
   <header class="bar">
     <span class="logo"><svg aria-hidden="true"><use href="#i-cass"/></svg>Whose <b>Track?</b></span>
-    <span class="grow"></span>
     <div class="langsw" role="group" data-i18n-aria="lang.group"><button type="button" data-lang="en">EN</button><button type="button" data-lang="pt">PT</button></div>
+    <span class="grow"></span>
   </header>
   <h1 class="end-title" data-i18n-html="end.title"></h1>
   <div class="end-grid">
@@ -627,7 +622,7 @@ const I18N = {
     'home.tagline': 'A song plays. Everyone guesses whose headphones it came from.',
     'home.step1': '<b>Someone creates a room</b> and sends the link to the group.',
     'home.step2': '<b>Everyone connects Spotify.</b> The game grabs a random mix of each person’s music. Nobody sees anyone else’s list.',
-    'home.step3': '<b>Every track, everyone guesses</b> whose song it is. First to the target score wins.',
+    'home.step3': '<b>Every track, everyone guesses</b> whose song it is, even yours: the mix is random, so you may not recognize your own. First to the target score wins.',
     'home.entry': 'Join the game',
     'home.name': 'Your name',
     'home.namePh': 'What your friends call you',
@@ -655,9 +650,8 @@ const I18N = {
     'toast.copied': 'Link copied. Send it to the group!',
     'toast.copyThis': 'Copy this link: {link}',
     'tape.title': 'Your tape',
-    'tape.introOff': 'Connect Spotify and the game grabs a random mix of what you listen to: most played, liked songs, your playlists and saved albums. Only you can see it.',
+    'tape.introOff': 'Connect Spotify and the game grabs a random mix of what you listen to: most played, liked songs, your playlists and saved albums. Nobody sees the list, not even you.',
     'tape.on': ['Spotify connected · {n} song on your tape', 'Spotify connected · {n} songs on your tape'],
-    'tape.see': 'See my songs',
     'songs': ['{n} song', '{n} songs'],
     'spc.btn': 'Connect Spotify',
     'spc.note': 'Only Spotify accounts on this game’s guest list can connect (up to 5 people).',
@@ -693,10 +687,10 @@ const I18N = {
     'start.goal': 'First to {n} points wins.',
     'rules.title': 'Scoring',
     'rules.0': 'First player to reach the target score wins.',
-    'rules.1': 'You can pick more than one person: sometimes the same song is on two tapes.',
+    'rules.1': 'Pick everyone you think has the song, yourself included: tapes are random, so you may not recognize your own.',
     'rules.2': '<span class="pts">+100</span> for each right person, <span class="pts">−50</span> for each wrong one.',
     'rules.3': '<span class="pts">+50</span> for naming exactly who has the song.',
-    'rules.4': 'If it’s your song: <span class="pts">+40</span> for each player who didn’t suspect you.',
+    'rules.4': 'If it’s your song: <span class="pts">+40</span> for each other player who didn’t pick you.',
     'game.track': 'Side {side} · Track {no}',
     'game.goal': 'First to {n}',
     'game.trackNo': 'TRACK {n}',
@@ -707,12 +701,10 @@ const I18N = {
     'sp.loading': 'Loading the Spotify player…',
     'game.playHere': 'Play the music on this device',
     'game.playHereHint': 'If you’re all in the same place, keep just one device playing.',
-    'game.mine': 'This one’s yours. Keep a straight face. If you think someone else has it too, pick them; if not, confirm without picking anyone.',
     'game.q': 'Whose track is this?',
-    'game.sub': 'You can pick more than one person. Guesses stay hidden until the reveal.',
+    'game.sub': 'Pick everyone you think has it, yourself included. Guesses stay hidden until the reveal.',
     'game.lock': 'Lock in guess',
     'game.locked': 'Guess locked in',
-    'game.onlyMe': 'Confirm: only I have this one',
     'game.voted': '{n} of {m} locked in:',
     'game.youChip': 'you',
     'game.revealNow': 'Reveal now',
@@ -738,6 +730,9 @@ const I18N = {
     'aw.twins': 'Twin headphones',
     'aw.twinsWhy': ['{n} song in common on their tapes.', '{n} songs in common on their tapes.'],
     'aw.and': ' and ',
+    'aw.self': 'Who even are you?',
+    'aw.selfWhy': ['Didn’t recognize their own song {n} time.', 'Didn’t recognize their own song {n} times.'],
+    'tape.secret': 'Your songs stay secret, even from you. You can vote for yourself.',
     'end.again': 'Play again with the same tapes',
     'end.againWait': 'If the host starts another game, you’ll go back to the room automatically.',
     'end.leave': 'Leave room',
@@ -764,7 +759,7 @@ const I18N = {
     'home.tagline': 'Toca uma música. A galera tenta adivinhar de quem é o fone.',
     'home.step1': '<b>Alguém cria a sala</b> e manda o link pro grupo.',
     'home.step2': '<b>Todo mundo conecta o Spotify.</b> O jogo pega uma mistura aleatória das músicas de cada um. Ninguém vê a lista dos outros.',
-    'home.step3': '<b>A cada faixa, todo mundo palpita</b> de quem é aquela música. Quem chegar primeiro na pontuação ganha.',
+    'home.step3': '<b>A cada faixa, todo mundo palpita</b> de quem é a música, inclusive em si mesmo: a mistura é aleatória e talvez você nem reconheça a sua. Ganha quem chegar primeiro na pontuação.',
     'home.entry': 'Entrar no jogo',
     'home.name': 'Seu nome',
     'home.namePh': 'Como o grupo te chama',
@@ -792,9 +787,8 @@ const I18N = {
     'toast.copied': 'Link copiado. Manda no grupo!',
     'toast.copyThis': 'Copie este link: {link}',
     'tape.title': 'Sua fita',
-    'tape.introOff': 'Conecte o Spotify e o jogo pega uma mistura aleatória do que você ouve: mais ouvidas, curtidas, suas playlists e álbuns salvos. Só você vê essa lista.',
+    'tape.introOff': 'Conecte o Spotify e o jogo pega uma mistura aleatória do que você ouve: mais ouvidas, curtidas, suas playlists e álbuns salvos. Ninguém vê a lista, nem você.',
     'tape.on': ['Spotify conectado · {n} música na sua fita', 'Spotify conectado · {n} músicas na sua fita'],
-    'tape.see': 'Ver minhas músicas',
     'songs': ['{n} música', '{n} músicas'],
     'spc.btn': 'Conectar Spotify',
     'spc.note': 'Só contas do Spotify na lista de convidados do jogo conseguem conectar (até 5 pessoas).',
@@ -830,10 +824,10 @@ const I18N = {
     'start.goal': 'Ganha quem chegar primeiro a {n} pontos.',
     'rules.title': 'Pontos',
     'rules.0': 'Ganha quem chegar primeiro na pontuação escolhida.',
-    'rules.1': 'Pode marcar mais de uma pessoa: às vezes a mesma música está na fita de dois.',
+    'rules.1': 'Marque todo mundo que você acha que tem a música, inclusive você: as fitas são aleatórias e talvez você não reconheça a sua.',
     'rules.2': '<span class="pts">+100</span> por pessoa certa, <span class="pts">−50</span> por pessoa errada.',
     'rules.3': '<span class="pts">+50</span> se acertar exatamente quem tem a música.',
-    'rules.4': 'Se a música é sua: <span class="pts">+40</span> por cada um que não desconfiou de você.',
+    'rules.4': 'Se a música é sua: <span class="pts">+40</span> por cada outro jogador que não marcou você.',
     'game.track': 'Lado {side} · Faixa {no}',
     'game.goal': 'Até {n} pontos',
     'game.trackNo': 'FAIXA {n}',
@@ -844,12 +838,10 @@ const I18N = {
     'sp.loading': 'Carregando o player do Spotify…',
     'game.playHere': 'Tocar a música neste aparelho',
     'game.playHereHint': 'Se estão todos no mesmo lugar, deixem só um aparelho tocando.',
-    'game.mine': 'Essa música é sua. Faça cara de paisagem. Se acha que mais alguém tem ela, marque; se não, confirme sem marcar ninguém.',
     'game.q': 'De quem é esse fone?',
-    'game.sub': 'Pode marcar mais de uma pessoa. Os palpites só aparecem na revelação.',
+    'game.sub': 'Marque todo mundo que você acha que tem essa música, inclusive você. Os palpites só aparecem na revelação.',
     'game.lock': 'Cravar palpite',
     'game.locked': 'Palpite cravado',
-    'game.onlyMe': 'Confirmar: só eu tenho essa',
     'game.voted': '{n} de {m} cravaram:',
     'game.youChip': 'você',
     'game.revealNow': 'Revelar agora',
@@ -875,6 +867,9 @@ const I18N = {
     'aw.twins': 'Fones gêmeos',
     'aw.twinsWhy': ['{n} música em comum nas fitas.', '{n} músicas em comum nas fitas.'],
     'aw.and': ' e ',
+    'aw.self': 'Nem se reconhece',
+    'aw.selfWhy': ['Não reconheceu a própria música {n} vez.', 'Não reconheceu a própria música {n} vezes.'],
+    'tape.secret': 'Suas músicas ficam em segredo, até pra você. Dá pra votar em você mesmo.',
     'end.again': 'Jogar de novo com as mesmas fitas',
     'end.againWait': 'Se o host quiser outra partida, você volta pra sala automaticamente.',
     'end.leave': 'Sair da sala',
@@ -984,18 +979,11 @@ function setTape(list) {
 }
 function renderMySongs() {
   const n = S.songs.length;
-  $('#my-count').textContent = n ? t('songs', { n }) : '';
+  // The list itself stays hidden, even from its owner: part of the fun is not recognizing your own song.
+  $('#my-count').textContent = '';
   $('#tape-off').hidden = n > 0;
   $('#tape-on').hidden = n === 0;
   $('#tape-on-text').textContent = t('tape.on', { n });
-  const mix = SOURCES.map((k) => [k, S.songs.filter((s) => s.src.includes(k)).length]).filter(([, c]) => c);
-  $('#tape-mix').textContent = mix.map(([k, c]) => `${t('src.' + k)}: ${c}`).join(' · ');
-  $('#song-list').replaceChildren(...S.songs.map((s, i) => {
-    const li = document.createElement('li'); li.className = 'song';
-    li.innerHTML = `<span class="num">${pad2(i + 1)}</span>${s.thumb ? `<img src="${esc(s.thumb)}" alt="" loading="lazy">` : '<span class="ph"></span>'}<span class="stitle"></span>`;
-    li.querySelector('.stitle').textContent = s.title || '—';
-    return li;
-  }));
 }
 
 /* ============ Spotify sign-in: pull the player's top songs ============ */
@@ -1307,7 +1295,7 @@ function makeHost() {
     addPlayer(pid, name, conn) {
       const used = new Set([...this.players.values()].map((p) => p.color));
       const color = COLORS.find((c) => !used.has(c)) || COLORS[this.players.size % COLORS.length];
-      const p = { id: pid, name: cleanName(name) || '???', color, songs: [], connected: true, conn, score: 0, stats: { hits: 0, misses: 0, fooled: 0 } };
+      const p = { id: pid, name: cleanName(name) || '???', color, songs: [], connected: true, conn, score: 0, stats: { hits: 0, misses: 0, fooled: 0, selfMiss: 0 } };
       this.players.set(pid, p); this.order.push(pid);
       return p;
     },
@@ -1327,7 +1315,7 @@ function makeHost() {
         case 'songs': if (this.phase === 'lobby') { p.songs = sanitizeSongs(msg.songs); this.broadcast(); } break;
         case 'vote':
           if (this.phase === 'round' && msg.n === this.idx + 1 && !this.votes.has(pid)) {
-            const picks = Array.isArray(msg.picks) ? [...new Set(msg.picks.filter((x) => typeof x === 'string' && x !== pid && this.players.has(x)))] : [];
+            const picks = Array.isArray(msg.picks) ? [...new Set(msg.picks.filter((x) => typeof x === 'string' && this.players.has(x)))] : [];
             this.votes.set(pid, picks); this.broadcast(); this.checkAllVoted();
           }
           break;
@@ -1391,7 +1379,7 @@ function makeHost() {
       }
       this.rounds = order.map((e) => ({ trackId: e.trackId, title: e.title, thumb: e.thumb, owners: [...e.owners] }));
       this.pairs = this.computePairs(live);
-      for (const p of this.players.values()) { p.score = 0; p.stats = { hits: 0, misses: 0, fooled: 0 }; }
+      for (const p of this.players.values()) { p.score = 0; p.stats = { hits: 0, misses: 0, fooled: 0, selfMiss: 0 }; }
       this.end = null;
       this.startRound(0);
     },
@@ -1435,8 +1423,8 @@ function makeHost() {
         const picks = this.votes.get(pid) || [];
         let hits = 0, misses = 0;
         for (const q of picks) { if (owners.has(q)) hits++; else misses++; }
-        const target = [...owners].filter((o) => o !== pid);
-        const exact = voted && target.length > 0 && misses === 0 && hits === target.length;
+        const exact = voted && misses === 0 && hits === owners.size;
+        if (owners.has(pid) && voted && !picks.includes(pid)) p.stats.selfMiss++;
         let fooled = 0;
         if (owners.has(pid)) for (const v of voters) if (v !== pid && !this.votes.get(v).includes(pid)) fooled++;
         const delta = Math.max(0, hits * PTS.hit + misses * PTS.miss) + (exact ? PTS.exact : 0) + fooled * PTS.fooled;
@@ -1458,7 +1446,7 @@ function makeHost() {
         const max = Math.max(0, ...ps.map((p) => p.stats[key]));
         return max > 0 ? { ids: ps.filter((p) => p.stats[key] === max).map((p) => p.id), n: max } : null;
       };
-      this.end = { detective: best('hits'), poker: best('fooled'), twins: this.pairs };
+      this.end = { detective: best('hits'), poker: best('fooled'), stranger: best('selfMiss'), twins: this.pairs };
       this.phase = 'end';
       this.broadcast();
     },
@@ -1481,7 +1469,7 @@ function makeHost() {
         st.round = {
           n: this.idx + 1, trackId: r.trackId, title: r.title, thumb: r.thumb,
           remaining: this.phase === 'round' && this.deadline ? Math.max(0, this.deadline - Date.now()) : null,
-          voted: [...this.votes.keys()], mine: r.owners.includes(pid), myVote: this.votes.get(pid) || null,
+          voted: [...this.votes.keys()], myVote: this.votes.get(pid) || null,
           last: this.phase === 'reveal' && this.isOver(),
           win: [...this.players.values()].some((p) => p.score >= this.settings.target),
         };
@@ -1598,23 +1586,21 @@ function renderGame(prev) {
 
 function renderRoundPanel() {
   const st = S.pub; const r = st.round;
-  $('#mine-note').hidden = !r.mine;
   const focused = document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.pid : null;
-  const others = st.players.filter((p) => p.id !== myPid);
-  $('#pick-grid').replaceChildren(...others.map((p) => {
+  $('#pick-grid').replaceChildren(...st.players.map((p) => {
     const b = document.createElement('button');
     b.type = 'button'; b.className = 'pick' + (p.connected ? '' : ' off'); b.dataset.pid = p.id;
     b.style.setProperty('--c', p.color);
     b.setAttribute('aria-pressed', S.picks.has(p.id) ? 'true' : 'false');
     b.disabled = S.locked;
     b.innerHTML = '<span class="n"></span><span class="ck" aria-hidden="true">✓</span>';
-    b.querySelector('.n').textContent = p.name;
+    b.querySelector('.n').textContent = displayName(p);
     return b;
   }));
   if (focused) { const f = $(`.pick[data-pid="${CSS.escape(focused)}"]`); if (f && !f.disabled) f.focus(); }
   const lock = $('#lock-btn');
-  lock.disabled = S.locked || (!r.mine && S.picks.size === 0);
-  lock.textContent = t(S.locked ? 'game.locked' : (r.mine && S.picks.size === 0 ? 'game.onlyMe' : 'game.lock'));
+  lock.disabled = S.locked || S.picks.size === 0;
+  lock.textContent = t(S.locked ? 'game.locked' : 'game.lock');
   const live = st.players.filter((p) => p.connected);
   const voted = new Set(r.voted);
   const vs = $('#vote-status');
@@ -1692,6 +1678,7 @@ function renderEnd() {
   const e = st.end || {};
   if (e.detective) awards.push({ lbl: t('aw.det'), who: names(e.detective.ids), why: t('aw.detWhy', { n: e.detective.n }) });
   if (e.poker) awards.push({ lbl: t('aw.poker'), who: names(e.poker.ids), why: t('aw.pokerWhy', { n: e.poker.n }) });
+  if (e.stranger) awards.push({ lbl: t('aw.self'), who: names(e.stranger.ids), why: t('aw.selfWhy', { n: e.stranger.n }) });
   if (e.twins) awards.push({ lbl: t('aw.twins'), who: names(e.twins.ids), why: t('aw.twinsWhy', { n: e.twins.n }) });
   $('#awards').replaceChildren(...awards.map((a) => {
     const c = document.createElement('section'); c.className = 'card award';
@@ -1733,7 +1720,7 @@ function spLoad(id) {
     SP.creating = true;
     const el = document.createElement('div');
     $('#sp-slot').replaceChildren(el);
-    SP.api.createController(el, { uri, width: '100%', height: window.innerWidth < 600 ? 80 : 152 }, (ctrl) => {
+    SP.api.createController(el, { uri, width: '100%', height: 80 }, (ctrl) => {
       SP.ctrl = ctrl; SP.creating = false; SP.current = id; SP.playOnReady = true; SP.seekPending = true;
       ctrl.addListener('ready', () => { if (SP.playOnReady) { SP.playOnReady = false; try { ctrl.play(); } catch (e) { /* user can press play */ } } });
       ctrl.addListener('playback_update', (ev) => {
