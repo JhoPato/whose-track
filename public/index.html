@@ -528,13 +528,13 @@ kbd{font:600 12px/1 var(--font-mono);background:var(--paper-shade);border:1px so
         <h2 id="reveal-title"></h2>
         <div class="owners" id="owners"></div>
         <ul class="rrows" id="reveal-rows"></ul>
-        <h3 class="reveal-h3" id="board-h"></h3>
-        <ol class="board" id="board"></ol>
         <div class="end-actions">
           <button class="btn primary big" id="next-btn" hidden></button>
         </div>
         <p id="next-wait"></p>
       </div>
+      <h3 class="reveal-h3" id="board-h"></h3>
+      <ol class="board" id="board"></ol>
     </section>
   </div>
 </main>
@@ -913,14 +913,23 @@ const myPid = ss.get('wt-pid', null) || (() => { const id = 'p' + Math.random().
 function cleanName(n) { return String(n ?? '').replace(/[\u0000-\u001f\u007f-\u009f​-‏‪-‮]/g, '').replace(/\s+/g, ' ').trim().slice(0, 20); }
 function cleanPid(p) { return typeof p === 'string' && /^p[a-z0-9]{4,12}$/.test(p) ? p : null; }
 function safeThumb(u) { return typeof u === 'string' && /^https:\/\/[a-z0-9.-]+\.(scdn\.co|spotifycdn\.com)\/[^\s"'<>]*$/i.test(u) ? u : ''; }
+// The same song often exists as several Spotify tracks (single, album, deluxe, remaster).
+// Songs are matched on a normalized "title|first artist" key instead of the track id.
+function songKey(name, artist) {
+  const norm = (x) => String(x || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+-\s+.*$/, '').replace(/\(.*?\)|\[.*?\]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
+  const n = norm(name);
+  return n ? (n + '|' + norm(artist)).slice(0, 200) : '';
+}
 function sanitizeSongs(arr) {
   if (!Array.isArray(arr)) return [];
   const seen = new Set(); const out = [];
   for (const s of arr) {
-    if (!s || !TRACK_ID.test(s.id) || seen.has(s.id)) continue;
-    seen.add(s.id);
+    const key = s && typeof s.key === 'string' && s.key ? s.key.slice(0, 200) : (s && s.id);
+    if (!s || !TRACK_ID.test(s.id) || seen.has(key)) continue;
+    seen.add(key);
     const src = Array.isArray(s.src) ? [...new Set(s.src.filter((x) => SOURCES.includes(x)))] : [];
-    out.push({ id: s.id, title: String(s.title ?? '').slice(0, 140), thumb: safeThumb(s.thumb), explicit: !!s.explicit, src: src.length ? src : ['top'] });
+    out.push({ id: s.id, title: String(s.title ?? '').slice(0, 140), thumb: safeThumb(s.thumb), explicit: !!s.explicit, src: src.length ? src : ['top'], key });
     if (out.length >= MAX_SONGS) break;
   }
   return out;
@@ -972,7 +981,7 @@ document.addEventListener('error', (e) => {
 
 /* ============ your tape (songs come from Spotify) ============ */
 function saveSongs() { ls.set('wt-tape', S.songs); }
-function sendableSongs() { return S.songs.map(({ id, title, thumb, explicit, src }) => ({ id, title, thumb, explicit, src })); }
+function sendableSongs() { return S.songs.map(({ id, title, thumb, explicit, src, key }) => ({ id, title, thumb, explicit, src, key })); }
 function setTape(list) {
   S.songs = sanitizeSongs(list);
   saveSongs(); renderMySongs(); sendHost({ t: 'songs', songs: sendableSongs() });
@@ -1056,8 +1065,9 @@ async function pullLibrary(token) {
   const songs = new Map();
   const add = (tr, src, images) => {
     if (!tr || tr.is_local || (tr.type && tr.type !== 'track') || !TRACK_ID.test(tr.id || '')) return;
-    let s = songs.get(tr.id);
-    if (!s) { s = { id: tr.id, title: String(tr.name || ''), thumb: pickThumb((tr.album && tr.album.images) || images), explicit: !!tr.explicit, src: [] }; songs.set(tr.id, s); }
+    const key = songKey(tr.name, tr.artists && tr.artists[0] && tr.artists[0].name) || tr.id;
+    let s = songs.get(key);
+    if (!s) { s = { id: tr.id, key, title: String(tr.name || ''), thumb: pickThumb((tr.album && tr.album.images) || images), explicit: !!tr.explicit, src: [] }; songs.set(key, s); }
     if (!s.src.includes(src)) s.src.push(src);
   };
 
@@ -1343,7 +1353,7 @@ function makeHost() {
       if (ps.filter((p) => p.songs.length > 0).length < 2) return { ok: false, why: 'start.needSongs' };
       if (!SOURCES.some((k) => this.settings.sources[k])) return { ok: false, why: 'start.noSources' };
       const uniq = new Set(); let owners = 0;
-      for (const p of ps) { const ok = p.songs.filter((s) => this.fits(s)); if (ok.length) owners++; ok.forEach((s) => uniq.add(s.id)); }
+      for (const p of ps) { const ok = p.songs.filter((s) => this.fits(s)); if (ok.length) owners++; ok.forEach((s) => uniq.add(s.key)); }
       if (owners < 2 || uniq.size < 3) return { ok: false, why: 'start.filtered' };
       return { ok: true, notReady: ps.filter((p) => !p.songs.length).length };
     },
@@ -1352,8 +1362,8 @@ function makeHost() {
       const live = [...this.players.values()].filter((p) => p.connected);
       const pool = new Map();
       for (const p of live) for (const s of p.songs.filter((x) => this.fits(x))) {
-        let e = pool.get(s.id);
-        if (!e) { e = { trackId: s.id, title: s.title, thumb: s.thumb, owners: new Set() }; pool.set(s.id, e); }
+        let e = pool.get(s.key);
+        if (!e) { e = { trackId: s.id, title: s.title, thumb: s.thumb, owners: new Set() }; pool.set(s.key, e); }
         e.owners.add(p.id);
         if (!e.title && s.title) { e.title = s.title; e.thumb = s.thumb; }
       }
@@ -1386,9 +1396,9 @@ function makeHost() {
     computePairs(ps) {
       let best = null;
       for (let i = 0; i < ps.length; i++) {
-        const a = new Set(ps[i].songs.map((s) => s.id));
+        const a = new Set(ps[i].songs.map((s) => s.key));
         for (let j = i + 1; j < ps.length; j++) {
-          const n = ps[j].songs.filter((s) => a.has(s.id)).length;
+          const n = ps[j].songs.filter((s) => a.has(s.key)).length;
           if (n > 0 && (!best || n > best.n)) best = { ids: [ps[i].id, ps[j].id], n };
         }
       }
@@ -1580,6 +1590,8 @@ function renderGame(prev) {
   $('#reveal-panel').hidden = inRound;
   $('#cass-label').style.setProperty('--c', inRound ? 'var(--accent)' : (playerById((st.reveal.owners || [])[0]) || {}).color || 'var(--accent)');
   if (inRound) renderRoundPanel(); else renderReveal();
+  $('#board-h').textContent = t('rev.board', { n: st.settings.target });
+  renderBoard($('#board'));
   $('#host-round').hidden = !(isHost && inRound);
   reels();
 }
@@ -1644,8 +1656,6 @@ function renderReveal() {
     if (row.fooled) add('', t('rev.fooled', { n: row.fooled }));
     return li;
   }));
-  $('#board-h').textContent = t('rev.board', { n: st.settings.target });
-  renderBoard($('#board'));
   $('#next-btn').hidden = !isHost;
   $('#next-btn').textContent = t(r.last ? 'rev.final' : 'rev.next');
   $('#next-wait').textContent = isHost ? '' : t(r.last ? (r.win ? 'rev.waitLast' : 'rev.waitOut') : 'rev.wait');
@@ -1709,7 +1719,7 @@ function tick() {
 setInterval(tick, 200);
 
 /* ============ Spotify player ============ */
-const SP = { api: null, ctrl: null, creating: false, current: null, want: null, playOnReady: false, playing: false, seekPending: false };
+const SP = { api: null, ctrl: null, creating: false, current: null, want: null, playOnReady: false, playing: false, seekPending: false, seekTo: null, seekTries: 0, fullMs: 60000 };
 window.onSpotifyIframeApiReady = (api) => { SP.api = api; if (SP.want && S.playHere) spLoad(SP.want); };
 function spLoad(id) {
   SP.want = id;
@@ -1726,16 +1736,26 @@ function spLoad(id) {
       ctrl.addListener('playback_update', (ev) => {
         const d = (ev && ev.data) || {};
         SP.playing = !d.isPaused; reels();
-        if (!SP.seekPending || d.isPaused || !(d.duration > 0)) return;
-        SP.seekPending = false;
-        const middle = S.pub && S.pub.settings && S.pub.settings.start === 'middle';
-        if (middle && d.duration > 60000 && (d.position || 0) < 10000) { try { ctrl.seek(Math.round((d.duration * 0.4) / 1000)); } catch (e) { /* ignore */ } }
+        // Right after a new song is loaded the embed can still report the previous one.
+        if (d.playingURI && d.playingURI !== 'spotify:track:' + SP.current) return;
+        if (d.isPaused || d.isBuffering || !(d.duration > 0)) return;
+        const pos = (d.position || 0) / 1000;
+        if (SP.seekPending) {
+          SP.seekPending = false;
+          const middle = S.pub && S.pub.settings && S.pub.settings.start === 'middle';
+          // 30-second previews (no Spotify login in this browser) can't be moved past their end.
+          if (middle && d.duration > SP.fullMs && pos < 15) { SP.seekTo = Math.round((d.duration * 0.4) / 1000); SP.seekTries = 0; try { ctrl.seek(SP.seekTo); } catch (e) { /* ignore */ } }
+        } else if (SP.seekTo != null) {
+          if (pos >= SP.seekTo - 3) SP.seekTo = null; // landed
+          else if (++SP.seekTries <= 3) { try { ctrl.seek(SP.seekTo); } catch (e) { /* ignore */ } }
+          else SP.seekTo = null;
+        }
       });
       $('#sp-status').textContent = t('sp.hint');
       if (SP.want !== id) spLoad(SP.want);
     });
   } else if (SP.current !== id) {
-    SP.current = id; SP.playOnReady = true; SP.seekPending = true;
+    SP.current = id; SP.playOnReady = true; SP.seekPending = true; SP.seekTo = null;
     SP.ctrl.loadUri(uri);
     setTimeout(() => { if (SP.playOnReady && SP.current === id) { SP.playOnReady = false; try { SP.ctrl.play(); } catch (e) { /* ignore */ } } }, 1800);
   } else {
