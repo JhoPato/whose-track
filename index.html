@@ -1,0 +1,1318 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Fone Alheio</title>
+<meta name="description" content="Jogo musical entre amigos: toca uma música e todo mundo tenta adivinhar de quem é o fone.">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#1a226b">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 44'%3E%3Crect x='2' y='2' width='60' height='40' rx='6' fill='%23ffcf3f' stroke='%231c1d2e' stroke-width='3'/%3E%3Crect x='12' y='12' width='40' height='14' rx='7' fill='%231c1d2e'/%3E%3Ccircle cx='21' cy='19' r='4' fill='%23f4f1e6'/%3E%3Ccircle cx='43' cy='19' r='4' fill='%23f4f1e6'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Kalam:wght@400;700&family=Martian+Mono:wght@500;700&family=Rethink+Sans:wght@400;500;700&display=swap">
+<style>
+/* Layout: a cobalt desk; every panel is a cassette J-card insert, each player is a coloured tape stripe */
+:root{
+  --desk:#1a226b;
+  --desk-deep:#11174d;
+  --desk-edge:#2f3a9c;
+  --shell:#0e1342;
+  --paper:#f4f1e6;
+  --paper-shade:#e7e2d2;
+  --field:#fffdf7;
+  --rule:#cbd3ee;
+  --ink:#1c1d2e;
+  --ink-soft:#5d6078;
+  --on-desk:#eef0ff;
+  --on-desk-soft:#aab1e8;
+  --accent:#ffcf3f;
+  --ok:#0f9d63;
+  --bad:#d93a54;
+  --focus:#5cc8ff;
+  --font-display:"Bowlby One","Arial Black",Impact,sans-serif;
+  --font-hand:"Kalam","Segoe Print","Comic Sans MS",cursive;
+  --font-body:"Rethink Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-mono:"Martian Mono",ui-monospace,"Cascadia Mono",Consolas,monospace;
+  --radius:10px;
+  --me:#ffcf3f;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0}
+body{
+  min-height:100vh;min-height:100dvh;
+  background-color:var(--desk);
+  background-image:
+    radial-gradient(900px 520px at 88% -12%, rgba(98,116,255,.38), transparent 62%),
+    radial-gradient(rgba(255,255,255,.055) 1px, transparent 1.2px);
+  background-size:auto,22px 22px;
+  background-attachment:fixed;
+  color:var(--on-desk);
+  font:16px/1.5 var(--font-body);
+  -webkit-font-smoothing:antialiased;
+}
+[hidden]{display:none!important}
+img{max-width:100%}
+h1,h2,h3{margin:0;text-wrap:balance;font-weight:700}
+p{margin:0}
+button{font:inherit}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+
+.wrap{
+  max-width:1120px;margin:0 auto;
+  padding-block:calc(env(safe-area-inset-top,0px) + 18px) calc(env(safe-area-inset-bottom,0px) + 56px);
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+}
+
+/* ---------- shared pieces ---------- */
+.logo{display:inline-flex;align-items:center;gap:10px;font-family:var(--font-display);font-size:22px;line-height:1;color:var(--paper);text-decoration:none;white-space:nowrap}
+.logo b{color:var(--accent);font-weight:400}
+.logo svg{width:34px;height:auto;flex:none}
+
+.card{color-scheme:light;background:var(--paper);color:var(--ink);border-radius:var(--radius);box-shadow:0 3px 0 var(--desk-deep),0 14px 34px rgba(4,7,40,.38);padding:18px;min-width:0}
+.card h2{font-size:18px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.card h2 small{font:500 13px/1 var(--font-mono);color:var(--ink-soft)}
+.stripe{height:11px;margin:-18px -18px 16px;border-radius:var(--radius) var(--radius) 0 0;background:linear-gradient(to bottom,var(--c,var(--accent)) 0 5px,var(--paper) 5px 7px,var(--c,var(--accent)) 7px 11px)}
+
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  font:700 15px/1.1 var(--font-body);padding:12px 18px;border-radius:8px;
+  border:2px solid var(--ink);background:var(--paper);color:var(--ink);
+  box-shadow:0 3px 0 var(--ink);cursor:pointer;transition:transform .06s,box-shadow .06s;
+  text-decoration:none;
+}
+.btn:active:not(:disabled){transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
+.btn.primary{background:var(--accent)}
+.btn.big{font-size:17px;padding:15px 22px;width:100%}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--on-desk);border-color:var(--on-desk-soft);box-shadow:none}
+.card .btn.ghost{color:var(--ink);border-color:var(--ink-soft)}
+.btn.small{padding:8px 12px;font-size:14px}
+.linkbtn{background:none;border:0;padding:4px 0;color:var(--ink-soft);text-decoration:underline;cursor:pointer;font-size:14px}
+
+.field{display:grid;gap:6px}
+.field label,.lbl{font:700 12px/1.2 var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft)}
+input[type=text],textarea,select{
+  width:100%;font:500 16px/1.4 var(--font-body);color:var(--ink);background:var(--field);
+  border:2px solid var(--ink);border-radius:8px;padding:11px 13px;
+}
+select{padding-block:9px;cursor:pointer}
+select:disabled{opacity:.75;cursor:default}
+textarea{resize:vertical;min-height:84px;font-size:14px}
+input::placeholder,textarea::placeholder{color:var(--ink-soft);opacity:.8}
+
+.dot{width:12px;height:12px;border-radius:50%;background:var(--c);border:2px solid var(--ink);flex:none}
+.tag{font:700 10px/1 var(--font-body);letter-spacing:.1em;text-transform:uppercase;background:var(--ink);color:var(--paper);padding:4px 6px;border-radius:4px;vertical-align:2px}
+.hand{font-family:var(--font-hand);font-weight:700}
+.muted{color:var(--ink-soft)}
+.msg{min-height:1.5em;font-size:14px}
+.msg.err{color:var(--bad);font-weight:700}
+
+/* ---------- home ---------- */
+.home{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:48px;align-items:center;padding-block:7vh 0}
+.hero h1{font-family:var(--font-display);font-weight:400;font-size:clamp(54px,9.5vw,112px);line-height:.9;color:var(--paper);letter-spacing:.005em}
+.hero h1 span{display:block;color:var(--accent)}
+.tagline{font-size:clamp(18px,2.3vw,22px);max-width:32ch;margin:18px 0 28px;color:var(--on-desk)}
+.steps{list-style:none;margin:0;padding:0;display:grid;gap:14px;max-width:48ch;counter-reset:s}
+.steps li{display:grid;grid-template-columns:34px minmax(0,1fr);gap:12px;align-items:start;color:var(--on-desk-soft)}
+.steps li b{color:var(--on-desk);font-weight:700}
+.steps li::before{counter-increment:s;content:counter(s);font:700 14px/30px var(--font-mono);text-align:center;width:30px;height:30px;border-radius:50%;border:2px solid var(--on-desk-soft);color:var(--on-desk)}
+.entry{display:grid;gap:16px}
+.entry .or{display:flex;align-items:center;gap:10px;font:700 12px/1 var(--font-body);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
+.entry .or::before,.entry .or::after{content:"";flex:1;height:2px;background:var(--rule)}
+.joinrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px}
+#code-input{font:700 20px/1.2 var(--font-mono);letter-spacing:.2em;text-transform:uppercase}
+.fineprint{margin-top:22px;font-size:13px;color:var(--on-desk-soft);max-width:60ch}
+
+/* ---------- top bar ---------- */
+.bar{display:flex;align-items:center;gap:14px 18px;flex-wrap:wrap;margin-bottom:20px}
+.bar .grow{flex:1}
+.roomchip{display:flex;align-items:center;gap:10px;background:var(--desk-deep);border:2px solid var(--desk-edge);border-radius:10px;padding:6px 8px 6px 12px}
+.roomchip .lbl{color:var(--on-desk-soft)}
+.roomchip strong{font:700 20px/1 var(--font-mono);letter-spacing:.18em;color:var(--accent)}
+
+/* ---------- lobby ---------- */
+.lobby-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:22px;align-items:start}
+.side{display:grid;gap:22px;min-width:0}
+.tape-card .intro{color:var(--ink-soft);font-size:14px;margin:4px 0 14px}
+.addrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.addrow .msg{flex:1;min-width:160px}
+details.help{margin-top:12px;border:2px dashed var(--rule);border-radius:8px;padding:10px 12px;font-size:14px}
+details.help summary{cursor:pointer;font-weight:700}
+details.help ul{margin:8px 0 0;padding-left:18px;display:grid;gap:6px;color:var(--ink-soft)}
+details.help b{color:var(--ink)}
+kbd{font:600 12px/1 var(--font-mono);background:var(--paper-shade);border:1px solid var(--ink-soft);border-bottom-width:2px;border-radius:4px;padding:2px 5px;color:var(--ink)}
+.songs{list-style:none;margin:16px 0 0;padding:0;border-top:2px solid var(--ink)}
+.song{display:grid;grid-template-columns:28px 36px minmax(0,1fr) 32px;gap:10px;align-items:center;min-height:46px;padding:5px 0;border-bottom:1px solid var(--rule)}
+.song .num{font:500 12px/1 var(--font-mono);color:var(--ink-soft);text-align:right}
+.song img,.song .ph{width:36px;height:36px;border-radius:4px;object-fit:cover;background:var(--paper-shade)}
+.song .stitle{font-family:var(--font-hand);font-weight:700;font-size:17px;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.song.loading .stitle{color:var(--ink-soft);font-weight:400}
+.song.bad .stitle{color:var(--bad);font-family:var(--font-body);font-size:14px}
+.song .x{width:32px;height:32px;border-radius:6px;border:0;background:transparent;color:var(--ink-soft);font-size:22px;line-height:1;cursor:pointer}
+.song .x:hover{background:var(--paper-shade);color:var(--ink)}
+.empty-songs{padding:22px 4px 8px;color:var(--ink-soft);font-family:var(--font-hand);font-size:18px}
+.tape-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:10px;flex-wrap:wrap}
+
+.plist{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:8px}
+.prow{display:grid;grid-template-columns:12px minmax(0,1fr) auto;gap:4px 12px;align-items:center;padding:10px 12px;border-radius:8px;background:var(--field);border:2px solid var(--paper-shade);border-left:8px solid var(--c)}
+.prow .dot{display:none}
+.prow .pname{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;grid-column:1 / 3}
+.prow .pname em{font-style:normal;font-weight:500;color:var(--ink-soft)}
+.prow .pmeta{grid-column:1 / 3;font-size:13px;color:var(--ink-soft)}
+.prow .pready{grid-row:1 / 3;grid-column:3;font:700 11px/1 var(--font-body);letter-spacing:.08em;text-transform:uppercase;padding:6px 8px;border-radius:999px;background:var(--paper-shade);color:var(--ink-soft)}
+.prow .pready.yes{background:var(--ok);color:var(--paper)}
+.prow.off{opacity:.5}
+.readyrow{display:flex;align-items:center;gap:10px;margin-top:14px;font-weight:700;cursor:pointer}
+.readyrow input{width:22px;height:22px;accent-color:var(--ok)}
+.settings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:14px 0}
+#start-why{font-size:14px;color:var(--ink-soft);margin-bottom:12px}
+.rules{font-size:14px;color:var(--on-desk-soft)}
+.rules summary{cursor:pointer;color:var(--on-desk);font-weight:700}
+.rules ul{margin:10px 0 0;padding-left:18px;display:grid;gap:6px}
+.pts{font:700 13px/1 var(--font-mono);color:var(--accent)}
+
+/* ---------- game ---------- */
+.sidelabel{font:700 13px/1 var(--font-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--on-desk)}
+.sidelabel small{display:block;margin-top:6px;font-size:11px;color:var(--on-desk-soft);letter-spacing:.08em}
+.counter{display:flex;gap:3px;padding:5px;background:var(--shell);border:2px solid var(--desk-edge);border-radius:8px}
+.counter span{display:block;width:26px;padding:6px 0;text-align:center;font:700 20px/1 var(--font-mono);font-variant-numeric:tabular-nums;color:var(--ink);background:var(--paper);border-radius:3px}
+.counter.low span{background:var(--bad);color:var(--paper)}
+.counter.idle span{color:var(--ink-soft)}
+.timebar{height:6px;border-radius:3px;background:var(--desk-deep);overflow:hidden;margin:-6px 0 20px}
+.timebar i{display:block;height:100%;width:100%;background:var(--accent);transform-origin:left;transition:transform .2s linear}
+
+.game-grid{display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);gap:22px;align-items:start}
+.deck{display:grid;gap:14px;min-width:0}
+.cassette{background:var(--shell);border:3px solid var(--desk-edge);border-radius:16px;padding:16px 16px 0;box-shadow:0 14px 34px rgba(4,7,40,.45)}
+.cass-label{position:relative;background:var(--paper);color:var(--ink);border-radius:6px;padding:12px 14px 14px;
+  background-image:linear-gradient(to bottom,var(--c,var(--accent)) 0 6px,transparent 6px 8px,var(--c,var(--accent)) 8px 12px,transparent 12px),repeating-linear-gradient(to bottom,transparent 0 29px,var(--rule) 29px 30px);
+  background-position:0 0,0 14px;padding-top:24px;min-height:150px}
+.cass-label .side{position:absolute;top:22px;right:12px;font:400 30px/1 var(--font-display);color:var(--ink)}
+.cass-meta{display:grid;grid-template-columns:64px minmax(0,1fr);gap:12px;align-items:center;padding-right:34px}
+.cass-meta img,.cass-meta .ph{width:64px;height:64px;border-radius:4px;object-fit:cover;background:var(--paper-shade);border:2px solid var(--ink)}
+#track-title{font-family:var(--font-hand);font-weight:700;font-size:clamp(22px,3vw,28px);line-height:1.15;overflow-wrap:anywhere}
+.cass-of{font:500 12px/1 var(--font-mono);color:var(--ink-soft);margin-top:8px}
+.cass-window{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:14px auto 0;max-width:280px;height:62px;background:var(--desk-deep);border:3px solid var(--desk-edge);border-radius:31px;padding:0 10px}
+.cass-window .band{flex:1;height:16px;border-radius:8px;background:linear-gradient(to bottom,#2a1d12,#4a3220 50%,#2a1d12)}
+.reel{width:44px;height:44px;flex:none}
+.spinning .reel{animation:spin 1.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.cass-foot{height:28px;margin:12px 48px 0;border:3px solid var(--desk-edge);border-bottom:0;border-radius:10px 10px 0 0}
+.player-box{background:var(--desk-deep);border:2px solid var(--desk-edge);border-radius:var(--radius);padding:12px}
+#sp-slot{min-height:80px;border-radius:12px;overflow:hidden}
+#sp-slot iframe{display:block;border-radius:12px}
+.sp-status{font-size:13px;color:var(--on-desk-soft);margin-top:8px}
+.toggle{display:grid;grid-template-columns:20px minmax(0,1fr);gap:2px 10px;align-items:center;font-size:14px;color:var(--on-desk);cursor:pointer}
+.toggle input{width:20px;height:20px;margin:0;accent-color:var(--accent)}
+.toggle small{grid-column:2;font-size:13px;color:var(--on-desk-soft)}
+
+.play-card h2{font-family:var(--font-display);font-weight:400;font-size:clamp(26px,3.4vw,34px);line-height:1}
+.play-card .sub{color:var(--ink-soft);margin:8px 0 16px}
+.note{background:var(--accent);color:var(--ink);border:2px solid var(--ink);border-radius:8px;padding:10px 12px;font-weight:700;margin-bottom:14px}
+.pick-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+.pick{display:flex;align-items:center;gap:10px;text-align:left;padding:13px 12px;border-radius:8px;border:2px solid var(--ink);border-left:10px solid var(--c);background:var(--field);color:var(--ink);font-weight:700;cursor:pointer;min-width:0}
+.pick span.n{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pick .ck{width:22px;height:22px;border-radius:50%;border:2px solid var(--ink-soft);display:grid;place-items:center;font-size:13px;color:transparent;flex:none}
+.pick[aria-pressed=true]{background:color-mix(in srgb,var(--c) 38%,var(--field));box-shadow:0 3px 0 var(--ink)}
+.pick[aria-pressed=true] .ck{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.pick:disabled{cursor:default}
+.pick.off{opacity:.55}
+.vote-status{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:14px;font-size:14px;color:var(--ink-soft)}
+.vchip{display:inline-flex;align-items:center;gap:6px;padding:4px 9px;border-radius:999px;background:var(--paper-shade);font-size:13px;font-weight:700;color:var(--ink-soft)}
+.vchip.done{background:var(--ink);color:var(--paper)}
+.vchip .dot{width:9px;height:9px;border-width:1px}
+.hostrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+
+.owners{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 18px}
+.owner{display:inline-flex;align-items:center;gap:10px;padding:10px 16px 10px 12px;border-radius:10px;border:2px solid var(--ink);background:color-mix(in srgb,var(--c) 45%,var(--field));font:400 22px/1 var(--font-display);color:var(--ink);box-shadow:0 3px 0 var(--ink)}
+.owner .dot{width:16px;height:16px}
+.rrows{list-style:none;margin:0;padding:0;border-top:2px solid var(--ink)}
+.rrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;padding:10px 0;border-bottom:1px solid var(--rule)}
+.rrow .who{display:flex;align-items:center;gap:8px;font-weight:700;min-width:0}
+.rrow .who span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rrow .delta{grid-row:1 / 3;grid-column:2;align-self:center;font:700 18px/1 var(--font-mono);font-variant-numeric:tabular-nums}
+.rrow .delta.pos{color:var(--ok)}
+.rrow .delta.zero{color:var(--ink-soft)}
+.rrow .detail{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;color:var(--ink-soft)}
+.gchip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:999px;font-weight:700;font-size:12px;border:1.5px solid currentColor}
+.gchip.hit{color:var(--ok)}
+.gchip.miss{color:var(--bad)}
+.badge{font:700 11px/1 var(--font-body);letter-spacing:.06em;text-transform:uppercase;padding:4px 7px;border-radius:4px;background:var(--ink);color:var(--paper)}
+.badge.gold{background:var(--accent);color:var(--ink);border:1.5px solid var(--ink)}
+.board{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:6px}
+.board li{display:grid;grid-template-columns:26px 12px minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 10px;border-radius:8px;background:var(--field);border:1px solid var(--paper-shade)}
+.board .rk{font:700 13px/1 var(--font-mono);color:var(--ink-soft);text-align:right}
+.board .nm{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.board .sc{font:700 15px/1 var(--font-mono);font-variant-numeric:tabular-nums}
+.board li.me{border:2px solid var(--ink)}
+.reveal-h3{margin-top:22px;font:700 12px/1 var(--font-body);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
+#next-wait,#again-wait{margin-top:12px;font-size:14px;color:var(--ink-soft)}
+
+/* ---------- end ---------- */
+.end-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:22px;align-items:start}
+.end-title{font-family:var(--font-display);font-weight:400;font-size:clamp(44px,8vw,88px);line-height:.92;color:var(--paper);margin:8px 0 22px}
+.end-title span{display:block;color:var(--accent)}
+.podium{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.podium li{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:14px;align-items:center;padding:14px 16px;border-radius:10px;background:var(--field);border:2px solid var(--paper-shade);border-left:10px solid var(--c)}
+.podium .pos{font:400 26px/1 var(--font-display);color:var(--ink-soft)}
+.podium li:first-child{border-color:var(--ink);border-left-color:var(--c);box-shadow:0 3px 0 var(--ink)}
+.podium li:first-child .pos{color:var(--ink)}
+.podium .nm{font-weight:700;font-size:18px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.podium .sc{font:700 20px/1 var(--font-mono);font-variant-numeric:tabular-nums}
+.awards{display:grid;gap:14px}
+.award .lbl{display:block;margin-bottom:6px}
+.award p{font-family:var(--font-hand);font-weight:700;font-size:22px;line-height:1.2}
+.award small{display:block;font-size:14px;color:var(--ink-soft);margin-top:4px}
+.end-actions{display:grid;gap:10px;margin-top:18px}
+
+/* ---------- banner & toast ---------- */
+.banner{position:fixed;left:0;right:0;top:0;z-index:30;background:var(--bad);color:var(--paper);
+  padding:calc(env(safe-area-inset-top,0px) + 10px) max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));
+  display:flex;gap:10px 14px;align-items:center;flex-wrap:wrap;font-weight:700}
+.banner .grow{flex:1;min-width:180px}
+.banner .btn{box-shadow:none}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 20px);transform:translateX(-50%);z-index:40;background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:8px;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,.35);max-width:calc(100% - 32px)}
+
+@media (max-width:860px){
+  .home,.lobby-grid,.game-grid,.end-grid{grid-template-columns:minmax(0,1fr)}
+  .home{gap:30px;padding-block:8px 0}
+  .cassette{padding-bottom:16px;border-radius:12px}
+  .cass-window,.cass-foot{display:none}
+  .cass-label{min-height:0}
+  .bar{margin-bottom:14px}
+}
+@media (max-width:440px){
+  .settings-grid{grid-template-columns:minmax(0,1fr)}
+  .counter span{width:22px;font-size:17px}
+  .pick-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (prefers-reduced-motion:reduce){
+  .spinning .reel{animation:none}
+  .timebar i{transition:none}
+  .btn{transition:none}
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-cass" viewBox="0 0 64 44">
+    <rect x="2" y="2" width="60" height="40" rx="6" fill="#ffcf3f" stroke="#1c1d2e" stroke-width="3"/>
+    <rect x="12" y="12" width="40" height="14" rx="7" fill="#1c1d2e"/>
+    <circle cx="21" cy="19" r="4" fill="#f4f1e6"/><circle cx="43" cy="19" r="4" fill="#f4f1e6"/>
+    <path d="M16 42l4-8h24l4 8" fill="none" stroke="#1c1d2e" stroke-width="3"/>
+  </symbol>
+  <symbol id="i-reel" viewBox="0 0 44 44">
+    <circle cx="22" cy="22" r="20" fill="#f4f1e6"/>
+    <circle cx="22" cy="22" r="8" fill="#0e1342"/>
+    <path d="M22 4v9M22 31v9M4 22h9M31 22h9" stroke="#0e1342" stroke-width="4" stroke-linecap="round"/>
+  </symbol>
+</svg>
+
+<!-- ================= HOME ================= -->
+<main class="wrap" data-screen="home">
+  <div class="home">
+    <section class="hero">
+      <h1>Fone<span>Alheio</span></h1>
+      <p class="tagline">Toca uma música. A galera tenta adivinhar de quem é o fone.</p>
+      <ol class="steps">
+        <li><span><b>Alguém cria a sala</b> e manda o link pro grupo.</span></li>
+        <li><span><b>Cada um cola links de músicas</b> que anda ouvindo no Spotify. Ninguém vê as músicas dos outros.</span></li>
+        <li><span><b>A cada faixa, todo mundo palpita</b> de quem é aquela música. Quem tem a música ganha ponto se ninguém desconfiar.</span></li>
+      </ol>
+    </section>
+    <section class="card entry" aria-label="Entrar no jogo">
+      <div class="stripe"></div>
+      <div class="field">
+        <label for="name-input">Seu nome</label>
+        <input type="text" id="name-input" maxlength="20" autocomplete="nickname" placeholder="Como o grupo te chama">
+      </div>
+      <button class="btn primary big" id="create-btn">Criar sala</button>
+      <div class="or">ou entre numa sala</div>
+      <div class="field">
+        <label for="code-input">Código da sala</label>
+        <div class="joinrow">
+          <input type="text" id="code-input" maxlength="5" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="K7RTB">
+          <button class="btn" id="join-btn">Entrar</button>
+        </div>
+      </div>
+      <p class="msg" id="home-msg" role="status"></p>
+    </section>
+  </div>
+  <p class="fineprint">A sala vive no navegador de quem criou: se o host fechar a aba, a partida acaba. A música toca pelo player do Spotify; quem estiver logado no Spotify neste navegador ouve a faixa inteira, os outros ouvem uma prévia de 30 segundos.</p>
+</main>
+
+<!-- ================= LOBBY ================= -->
+<main class="wrap" data-screen="lobby" hidden>
+  <header class="bar">
+    <span class="logo"><svg aria-hidden="true"><use href="#i-cass"/></svg>Fone <b>Alheio</b></span>
+    <span class="grow"></span>
+    <div class="roomchip"><span class="lbl">Sala</span><strong id="room-code">-----</strong>
+      <button class="btn small" id="copy-link">Copiar convite</button></div>
+    <button class="btn ghost small" id="leave-lobby">Sair</button>
+  </header>
+
+  <div class="lobby-grid">
+    <section class="card tape-card" aria-labelledby="tape-h" style="--c:var(--me)">
+      <div class="stripe"></div>
+      <h2 id="tape-h">Sua fita <small id="my-count">0 músicas</small></h2>
+      <p class="intro">Cole links de músicas que você ouve de verdade. De 8 a 15 é um bom número. Só você vê essa lista.</p>
+      <div class="field">
+        <label for="paste">Links do Spotify</label>
+        <textarea id="paste" placeholder="https://open.spotify.com/track/..."></textarea>
+      </div>
+      <div class="addrow">
+        <button class="btn primary" id="add-btn">Adicionar à fita</button>
+        <p class="msg" id="paste-msg" role="status"></p>
+      </div>
+      <details class="help">
+        <summary>Como copiar várias músicas do Spotify</summary>
+        <ul>
+          <li><b>No computador:</b> abra uma playlist com o que você mais ouve (a do seu Wrapped, "No Repeat" ou suas Curtidas). Clique numa música, aperte <kbd>Ctrl</kbd>+<kbd>A</kbd> pra selecionar todas (ou segure <kbd>Ctrl</kbd> e clique nas que quiser), depois <kbd>Ctrl</kbd>+<kbd>C</kbd> e cole aqui. No Mac é <kbd>Cmd</kbd>.</li>
+          <li><b>No celular:</b> na música, toque em <b>⋯</b>, depois <b>Compartilhar</b> e <b>Copiar link</b>. Cole aqui uma de cada vez.</li>
+          <li>Links de playlist ou álbum inteiro não funcionam, só de músicas.</li>
+        </ul>
+      </details>
+      <ol class="songs" id="song-list"></ol>
+      <p class="empty-songs" id="song-empty">Fita virgem. Cole uns links aí em cima.</p>
+      <div class="tape-foot">
+        <span class="muted" style="font-size:13px">Máximo de 50 músicas.</span>
+        <button class="linkbtn" id="clear-songs">Apagar todas</button>
+      </div>
+    </section>
+
+    <div class="side">
+      <section class="card" aria-labelledby="room-h">
+        <h2 id="room-h">Na sala <small id="pcount"></small></h2>
+        <ul class="plist" id="player-list"></ul>
+        <label class="readyrow"><input type="checkbox" id="ready-box"> Minha fita está pronta</label>
+      </section>
+
+      <section class="card" aria-labelledby="match-h">
+        <h2 id="match-h">Partida</h2>
+        <div class="settings-grid">
+          <div class="field">
+            <label for="set-rounds">Faixas</label>
+            <select id="set-rounds">
+              <option value="8">8</option><option value="12">12</option><option value="16">16</option><option value="20">20</option><option value="0">Todas</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="set-secs">Tempo pra palpitar</label>
+            <select id="set-secs">
+              <option value="20">20 s</option><option value="30">30 s</option><option value="45">45 s</option><option value="60">60 s</option><option value="0">Sem limite</option>
+            </select>
+          </div>
+        </div>
+        <p id="start-why"></p>
+        <button class="btn primary big" id="start-btn">Começar a fita</button>
+      </section>
+
+      <details class="rules" open>
+        <summary>Pontos</summary>
+        <ul>
+          <li>Pode marcar mais de uma pessoa: às vezes a mesma música está na fita de dois.</li>
+          <li><span class="pts">+100</span> por pessoa certa, <span class="pts">−50</span> por pessoa errada.</li>
+          <li><span class="pts">+50</span> se acertar exatamente quem tem a música.</li>
+          <li>Se a música é sua: <span class="pts">+40</span> por cada um que não desconfiou de você.</li>
+        </ul>
+      </details>
+    </div>
+  </div>
+</main>
+
+<!-- ================= GAME ================= -->
+<main class="wrap" data-screen="game" hidden>
+  <header class="bar">
+    <span class="logo"><svg aria-hidden="true"><use href="#i-cass"/></svg>Fone <b>Alheio</b></span>
+    <span class="grow"></span>
+    <div class="sidelabel" id="side-label">Lado A · Faixa 01<small id="round-of">1 de 12</small></div>
+    <div class="counter" id="counter" role="timer" aria-label="Tempo restante"><span>0</span><span>3</span><span>0</span></div>
+  </header>
+  <div class="timebar"><i id="timebar-fill"></i></div>
+
+  <div class="game-grid">
+    <section class="deck" aria-label="Música da vez">
+      <div class="cassette" id="cassette">
+        <div class="cass-label" id="cass-label">
+          <span class="side" id="cass-side">A</span>
+          <div class="cass-meta">
+            <span class="ph" id="track-ph"></span>
+            <img id="track-thumb" alt="" hidden>
+            <div>
+              <p id="track-title">Faixa misteriosa</p>
+              <p class="cass-of" id="cass-of">FAIXA 1 DE 12</p>
+            </div>
+          </div>
+        </div>
+        <div class="cass-window">
+          <svg class="reel" aria-hidden="true"><use href="#i-reel"/></svg>
+          <span class="band"></span>
+          <svg class="reel" aria-hidden="true"><use href="#i-reel"/></svg>
+        </div>
+        <div class="cass-foot"></div>
+      </div>
+      <div class="player-box">
+        <div id="sp-slot"></div>
+        <p class="sp-status" id="sp-status">Se a música não começar sozinha, aperte o play no player.</p>
+      </div>
+      <label class="toggle"><input type="checkbox" id="play-here"><span>Tocar a música neste aparelho</span><small>Se estão todos no mesmo lugar, deixem só um aparelho tocando.</small></label>
+    </section>
+
+    <section class="card play-card">
+      <div class="stripe" style="--c:var(--me)"></div>
+      <div id="round-panel">
+        <p class="note" id="mine-note" hidden>Essa música é sua. Faça cara de paisagem. Se acha que mais alguém tem ela, marque; se não, confirme sem marcar ninguém.</p>
+        <h2>De quem é esse fone?</h2>
+        <p class="sub">Pode marcar mais de uma pessoa. Os palpites só aparecem na revelação.</p>
+        <div class="pick-grid" id="pick-grid"></div>
+        <button class="btn primary big" id="lock-btn">Cravar palpite</button>
+        <div class="vote-status" id="vote-status"></div>
+        <div class="hostrow" id="host-round" hidden>
+          <button class="btn ghost small" id="reveal-now">Revelar agora</button>
+        </div>
+      </div>
+      <div id="reveal-panel" hidden>
+        <h2 id="reveal-title">Essa era de…</h2>
+        <div class="owners" id="owners"></div>
+        <ul class="rrows" id="reveal-rows"></ul>
+        <h3 class="reveal-h3">Placar</h3>
+        <ol class="board" id="board"></ol>
+        <div class="end-actions">
+          <button class="btn primary big" id="next-btn" hidden>Próxima faixa</button>
+        </div>
+        <p id="next-wait"></p>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- ================= END ================= -->
+<main class="wrap" data-screen="end" hidden>
+  <header class="bar">
+    <span class="logo"><svg aria-hidden="true"><use href="#i-cass"/></svg>Fone <b>Alheio</b></span>
+  </header>
+  <h1 class="end-title">Fim<span>da fita</span></h1>
+  <div class="end-grid">
+    <section class="card">
+      <div class="stripe"></div>
+      <h2>Placar final</h2>
+      <ol class="podium" id="podium" style="margin-top:14px"></ol>
+    </section>
+    <div class="side">
+      <div class="awards" id="awards"></div>
+      <div class="end-actions">
+        <button class="btn primary big" id="again-btn" hidden>Jogar de novo com as mesmas fitas</button>
+        <p id="again-wait"></p>
+        <button class="btn ghost" id="leave-end">Sair da sala</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="banner" id="banner" role="alert" hidden><span class="grow" id="banner-text"></span><span id="banner-actions" style="display:flex;gap:8px"></span></div>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<noscript><p class="wrap">O Fone Alheio precisa de JavaScript ligado.</p></noscript>
+
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script>
+'use strict';
+
+/* ============ constants & helpers ============ */
+const PREFIX = 'fonealheio-v1-';
+const MAX_PLAYERS = 8;
+const MAX_SONGS = 50;
+const PTS = { hit: 100, miss: -50, exact: 50, fooled: 40 };
+const COLORS = ['#ff6b5a', '#ffcf3f', '#36d39b', '#4cc3ff', '#b48cff', '#ff7fc8', '#a6e34b', '#ff9f43'];
+const CODE_CHARS = 'BCDFGHJKLMNPQRSTVWXZ23456789';
+const ROUND_OPTS = [8, 12, 16, 20, 0];
+const SECS_OPTS = [20, 30, 45, 60, 0];
+const TRACK_ID = /^[A-Za-z0-9]{22}$/;
+
+const $ = (s, r = document) => r.querySelector(s);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const shuffle = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const plural = (n, one, many) => n + ' ' + (n === 1 ? one : many);
+const pad2 = (n) => String(n).padStart(2, '0');
+
+function mkStore(kind) {
+  return {
+    get(k, d) { try { const v = window[kind].getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set(k, v) { try { window[kind].setItem(k, JSON.stringify(v)); } catch (e) { /* storage blocked */ } },
+  };
+}
+const ls = mkStore('localStorage');
+const ss = mkStore('sessionStorage');
+
+const myPid = ss.get('fa-pid', null) || (() => { const id = 'p' + Math.random().toString(36).slice(2, 10); ss.set('fa-pid', id); return id; })();
+
+function cleanName(n) { return String(n ?? '').replace(/[\u0000-\u001f\u007f-\u009f​-‏‪-‮]/g, '').replace(/\s+/g, ' ').trim().slice(0, 20); }
+function cleanPid(p) { return typeof p === 'string' && /^p[a-z0-9]{4,12}$/.test(p) ? p : null; }
+function safeThumb(u) { return typeof u === 'string' && /^https:\/\/[a-z0-9.-]+\.(scdn\.co|spotifycdn\.com)\/[^\s"'<>]*$/i.test(u) ? u : ''; }
+function sanitizeSongs(arr) {
+  if (!Array.isArray(arr)) return [];
+  const seen = new Set(); const out = [];
+  for (const s of arr) {
+    if (!s || !TRACK_ID.test(s.id) || seen.has(s.id)) continue;
+    seen.add(s.id);
+    out.push({ id: s.id, title: String(s.title ?? '').slice(0, 140), thumb: safeThumb(s.thumb) });
+    if (out.length >= MAX_SONGS) break;
+  }
+  return out;
+}
+
+/* ============ client state ============ */
+const S = {
+  role: null,          // 'host' | 'guest'
+  code: null,
+  name: ls.get('fa-name', ''),
+  pub: null,           // last state from host
+  songs: sanitizeSongs(ls.get('fa-songs', [])).map((s) => ({ ...s })),
+  ready: false,
+  picks: new Set(),
+  locked: false,
+  playHere: ls.get('fa-play', true),
+  deadline: 0,         // performance.now() based
+};
+
+/* ============ screens, toast, banner ============ */
+function show(name) {
+  document.querySelectorAll('[data-screen]').forEach((el) => { el.hidden = el.dataset.screen !== name; });
+}
+let toastT = 0;
+function toast(text) { const t = $('#toast'); t.textContent = text; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 2400); }
+function showBanner(text, actions) {
+  $('#banner-text').textContent = text;
+  const box = $('#banner-actions'); box.replaceChildren();
+  for (const a of actions) { const b = document.createElement('button'); b.className = 'btn small'; b.textContent = a.label; b.onclick = a.fn; box.append(b); }
+  $('#banner').hidden = false;
+}
+function hideBanner() { $('#banner').hidden = true; }
+function homeMsg(text, isErr) { const m = $('#home-msg'); m.textContent = text || ''; m.classList.toggle('err', !!isErr); }
+
+/* ============ songs: parsing + metadata ============ */
+function parseInput(text) {
+  const ids = [];
+  const re = /(?:open\.spotify\.com\/(?:intl-[a-z]{2}(?:-[a-z]{2})?\/)?(?:embed\/)?track\/|spotify:track:)([A-Za-z0-9]{22})/gi;
+  let m; while ((m = re.exec(text))) ids.push(m[1]);
+  return {
+    ids,
+    other: /open\.spotify\.com\/(?:intl-[a-z-]+\/)?(playlist|album|artist|episode|show)\//i.test(text),
+    short: /(spotify\.link|spoti\.fi)\//i.test(text),
+  };
+}
+
+const metaCache = new Map();
+const metaQueue = [];
+let metaActive = 0;
+function needMeta(id) {
+  if (metaCache.has(id)) { applyMeta(id); return; }
+  if (metaQueue.includes(id)) return;
+  metaQueue.push(id); pumpMeta();
+}
+function pumpMeta() {
+  while (metaActive < 4 && metaQueue.length) {
+    const id = metaQueue.shift(); metaActive++;
+    fetch('https://open.spotify.com/oembed?url=' + encodeURIComponent('https://open.spotify.com/track/' + id))
+      .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+      .then((j) => metaCache.set(id, { title: String(j.title || '').slice(0, 140), thumb: safeThumb(j.thumbnail_url), bad: false }))
+      .catch((status) => metaCache.set(id, { title: '', thumb: '', bad: status === 404 || status === 400 }))
+      .finally(() => { metaActive--; applyMeta(id); pumpMeta(); });
+  }
+}
+function applyMeta(id) {
+  const m = metaCache.get(id); if (!m) return;
+  let changed = false;
+  for (const s of S.songs) {
+    if (s.id !== id || s.done) continue;
+    s.title = m.title; s.thumb = m.thumb; s.bad = m.bad; s.done = true; changed = true;
+  }
+  if (changed) { saveSongs(); renderMySongs(); sendSongsSoon(); }
+}
+function saveSongs() { ls.set('fa-songs', S.songs.filter((s) => !s.bad).map(({ id, title, thumb }) => ({ id, title, thumb }))); }
+function sendableSongs() { return S.songs.filter((s) => !s.bad).map(({ id, title, thumb }) => ({ id, title, thumb })); }
+
+function addFromText(text) {
+  const { ids, other, short } = parseInput(text);
+  const msg = $('#paste-msg'); msg.classList.remove('err');
+  if (!ids.length) {
+    msg.classList.add('err');
+    msg.textContent = short ? 'Links curtos (spotify.link) não funcionam. No Spotify, use "Copiar link da música".'
+      : other ? 'Esse é link de playlist ou álbum. Abra, selecione as músicas e copie elas.'
+      : 'Não achei nenhum link de música do Spotify aí.';
+    return;
+  }
+  const have = new Set(S.songs.map((s) => s.id));
+  let added = 0, dup = 0, cut = 0;
+  for (const id of ids) {
+    if (have.has(id)) { dup++; continue; }
+    if (S.songs.length >= MAX_SONGS) { cut++; continue; }
+    have.add(id); S.songs.push({ id, title: '', thumb: '', done: false }); added++;
+    needMeta(id);
+  }
+  const parts = [];
+  if (added) parts.push(plural(added, 'música adicionada', 'músicas adicionadas'));
+  if (dup) parts.push(plural(dup, 'repetida ignorada', 'repetidas ignoradas'));
+  if (cut) parts.push(`${cut} ficaram de fora (limite de ${MAX_SONGS})`);
+  if (other) parts.push('links de playlist/álbum foram ignorados');
+  msg.textContent = parts.join(' · ') + '.';
+  $('#paste').value = '';
+  saveSongs(); renderMySongs(); sendSongsSoon();
+}
+
+let songsT = 0;
+function sendSongsSoon() { clearTimeout(songsT); songsT = setTimeout(() => sendHost({ t: 'songs', songs: sendableSongs() }), 400); }
+
+function renderMySongs() {
+  const ol = $('#song-list');
+  ol.replaceChildren(...S.songs.map((s, i) => {
+    const li = document.createElement('li');
+    li.className = 'song' + (s.bad ? ' bad' : '') + (!s.done && !s.title ? ' loading' : '');
+    const label = s.bad ? 'Não achei essa música no Spotify' : (s.title || (s.done ? 'Música ' + s.id.slice(0, 6) : 'carregando…'));
+    li.innerHTML = `<span class="num">${pad2(i + 1)}</span>${s.thumb ? `<img src="${esc(s.thumb)}" alt="" loading="lazy">` : '<span class="ph"></span>'}<span class="stitle"></span><button class="x" type="button" data-id="${esc(s.id)}">×</button>`;
+    li.querySelector('.stitle').textContent = label;
+    li.querySelector('.x').setAttribute('aria-label', 'Tirar ' + label + ' da fita');
+    return li;
+  }));
+  const n = S.songs.filter((s) => !s.bad).length;
+  $('#my-count').textContent = plural(n, 'música', 'músicas');
+  $('#song-empty').hidden = S.songs.length > 0;
+}
+
+/* ============ networking ============ */
+let peer = null;
+let hostConn = null;
+
+function netErrorText(err) {
+  const t = err && err.type;
+  if (t === 'browser-incompatible') return 'Este navegador não suporta o jogo. Tente Chrome, Edge, Firefox ou Safari atualizados.';
+  if (t === 'network' || t === 'server-error' || t === 'socket-error' || t === 'socket-closed') return 'Não consegui falar com o servidor de salas. Confira a internet e tente de novo.';
+  return 'Deu ruim na conexão (' + (t || 'erro') + '). Tente de novo.';
+}
+function makeCode() { let c = ''; for (let i = 0; i < 5; i++) c += CODE_CHARS[Math.floor(Math.random() * CODE_CHARS.length)]; return c; }
+function readName() {
+  const n = cleanName($('#name-input').value);
+  if (!n) { homeMsg('Coloque seu nome primeiro.', true); $('#name-input').focus(); return null; }
+  S.name = n; ls.set('fa-name', n); return n;
+}
+function setHomeBusy(busy) { $('#create-btn').disabled = busy; $('#join-btn').disabled = busy; }
+function keepAlive(p) { p.on('disconnected', () => { setTimeout(() => { if (!p.destroyed && p.disconnected) { try { p.reconnect(); } catch (e) { /* retry later */ } } }, 1500); }); }
+
+function createRoom() {
+  if (typeof Peer === 'undefined') { homeMsg('Não carreguei a parte de conexão do jogo. Recarregue a página.', true); return; }
+  if (!readName()) return;
+  setHomeBusy(true); homeMsg('Criando sala…');
+  const attempt = (n) => {
+    const code = makeCode();
+    const p = new Peer(PREFIX + code.toLowerCase(), { debug: 1 });
+    let opened = false;
+    p.on('open', () => { opened = true; peer = p; S.role = 'host'; S.code = code; keepAlive(p); H.init(code, S.name); setHomeBusy(false); homeMsg(''); setUrl(code); });
+    p.on('connection', (conn) => H.accept(conn));
+    p.on('error', (err) => {
+      if (opened) { console.warn('peer', err); return; }
+      p.destroy();
+      if (err.type === 'unavailable-id' && n < 4) { attempt(n + 1); return; }
+      setHomeBusy(false); homeMsg(netErrorText(err), true);
+    });
+  };
+  attempt(0);
+}
+
+function joinRoom(code, quiet) {
+  if (typeof Peer === 'undefined') { homeMsg('Não carreguei a parte de conexão do jogo. Recarregue a página.', true); return; }
+  if (!quiet && !readName()) return;
+  code = String(code || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (code.length !== 5) { homeMsg('O código da sala tem 5 letras e números.', true); return; }
+  if (peer && !peer.destroyed) peer.destroy();
+  S.role = 'guest'; S.code = code;
+  setHomeBusy(true); if (!quiet) homeMsg('Entrando na sala ' + code + '…');
+  const p = new Peer({ debug: 1 }); peer = p;
+  p.on('open', () => { keepAlive(p); connectToHost(); });
+  p.on('error', (err) => {
+    if (p !== peer) return;
+    if (err.type === 'peer-unavailable') { failJoin('Não achei a sala ' + code + '. Confira o código ou peça um link novo pra quem criou.'); return; }
+    if (!hostConn || !hostConn.open) failJoin(netErrorText(err));
+  });
+}
+function failJoin(text) {
+  setHomeBusy(false);
+  if (S.pub) { showBanner(text, [{ label: 'Tentar de novo', fn: () => { hideBanner(); joinRoom(S.code, true); } }, { label: 'Sair', fn: leave }]); return; }
+  try { peer && peer.destroy(); } catch (e) { /* ignore */ }
+  peer = null; S.role = null;
+  show('home'); homeMsg(text, true);
+}
+function connectToHost() {
+  const conn = peer.connect(PREFIX + S.code.toLowerCase(), { reliable: true });
+  hostConn = conn;
+  const t = setTimeout(() => { if (hostConn === conn && !conn.open) failJoin('A sala não respondeu. Quem criou pode ter fechado a página.'); }, 15000);
+  conn.on('open', () => {
+    clearTimeout(t); hideBanner(); setHomeBusy(false); homeMsg('');
+    conn.send({ t: 'hello', pid: myPid, name: S.name, songs: sendableSongs(), ready: S.ready });
+    setUrl(S.code);
+  });
+  conn.on('data', (msg) => {
+    if (!msg || typeof msg !== 'object') return;
+    if (msg.t === 'state') onState(msg);
+    else if (msg.t === 'error') failJoin(String(msg.msg || 'A sala recusou a entrada.'));
+  });
+  conn.on('close', () => { if (hostConn === conn && S.role === 'guest') onHostLost(); });
+}
+function onHostLost() {
+  if (!S.pub) return;
+  showBanner('Perdi a conexão com a sala. Se quem criou fechou a página, a partida acabou.', [
+    { label: 'Reconectar', fn: () => { hideBanner(); if (peer && !peer.destroyed && peer.open) connectToHost(); else joinRoom(S.code, true); } },
+    { label: 'Sair', fn: leave },
+  ]);
+}
+function sendHost(msg) {
+  if (S.role === 'host') H.handle(myPid, msg);
+  else if (hostConn && hostConn.open) { try { hostConn.send(msg); } catch (e) { /* dropped */ } }
+}
+function setUrl(code) {
+  try { const u = new URL(location.href); u.searchParams.set('sala', code); history.replaceState(null, '', u); } catch (e) { /* ignore */ }
+}
+function inviteLink() {
+  const u = new URL(location.href); u.search = ''; u.hash = ''; u.searchParams.set('sala', S.code); return u.toString();
+}
+function leave() {
+  try { hostConn && hostConn.close(); } catch (e) { /* ignore */ }
+  try { peer && peer.destroy(); } catch (e) { /* ignore */ }
+  peer = null; hostConn = null; S.role = null; S.pub = null; S.code = null; S.deadline = 0;
+  H.stop(); H = makeHost();
+  spStop(); hideBanner(); setHomeBusy(false); homeMsg('');
+  try { const u = new URL(location.href); u.search = ''; history.replaceState(null, '', u); } catch (e) { /* ignore */ }
+  show('home');
+}
+
+/* ============ host engine (runs only in the host's browser) ============ */
+function makeHost() {
+  return {
+    code: null, hostPid: null,
+    players: new Map(), order: [],
+    settings: { rounds: 12, seconds: 30 },
+    phase: 'lobby', rounds: [], idx: -1, votes: new Map(), deadline: 0, timer: 0,
+    reveal: null, end: null, pairs: null,
+
+    init(code, name) {
+      this.code = code; this.hostPid = myPid;
+      const me = this.addPlayer(myPid, name, null);
+      me.songs = sanitizeSongs(sendableSongs()); me.ready = S.ready;
+      this.broadcast();
+    },
+    stop() { clearTimeout(this.timer); for (const p of this.players.values()) { try { p.conn && p.conn.close(); } catch (e) { /* ignore */ } } },
+    accept(conn) {
+      conn.on('data', (msg) => {
+        if (!msg || typeof msg !== 'object') return;
+        if (msg.t === 'hello') { this.hello(conn, msg); return; }
+        if (conn._pid) this.handle(conn._pid, msg);
+      });
+      conn.on('close', () => this.drop(conn));
+      conn.on('error', () => this.drop(conn));
+    },
+    hello(conn, msg) {
+      const pid = cleanPid(msg.pid);
+      if (!pid || pid === this.hostPid) { try { conn.close(); } catch (e) { /* ignore */ } return; }
+      let p = this.players.get(pid);
+      if (!p) {
+        if (this.players.size >= MAX_PLAYERS) { conn.send({ t: 'error', msg: 'A sala está cheia (máximo de ' + MAX_PLAYERS + ' pessoas).' }); setTimeout(() => conn.close(), 600); return; }
+        p = this.addPlayer(pid, msg.name, conn);
+      } else {
+        const old = p.conn; p.conn = conn; p.connected = true;
+        if (old && old !== conn) { try { old.close(); } catch (e) { /* ignore */ } }
+        p.name = cleanName(msg.name) || p.name;
+      }
+      conn._pid = pid;
+      if (this.phase === 'lobby') { p.songs = sanitizeSongs(msg.songs); p.ready = !!msg.ready; }
+      this.broadcast();
+    },
+    addPlayer(pid, name, conn) {
+      const used = new Set([...this.players.values()].map((p) => p.color));
+      const color = COLORS.find((c) => !used.has(c)) || COLORS[this.players.size % COLORS.length];
+      const p = { id: pid, name: cleanName(name) || 'Alguém', color, songs: [], ready: false, connected: true, conn, score: 0, stats: { hits: 0, misses: 0, fooled: 0 } };
+      this.players.set(pid, p); this.order.push(pid);
+      return p;
+    },
+    drop(conn) {
+      const pid = conn._pid; if (!pid) return;
+      const p = this.players.get(pid);
+      if (!p || p.conn !== conn) return;
+      p.conn = null; p.connected = false;
+      if (this.phase === 'lobby') { this.players.delete(pid); this.order = this.order.filter((x) => x !== pid); }
+      else if (this.phase === 'round') this.checkAllVoted();
+      this.broadcast();
+    },
+    handle(pid, msg) {
+      const p = this.players.get(pid); if (!p) return;
+      const isHost = pid === this.hostPid;
+      switch (msg.t) {
+        case 'songs': if (this.phase === 'lobby') { p.songs = sanitizeSongs(msg.songs); this.broadcast(); } break;
+        case 'ready': if (this.phase === 'lobby') { p.ready = !!msg.v; this.broadcast(); } break;
+        case 'vote':
+          if (this.phase === 'round' && msg.n === this.idx + 1 && !this.votes.has(pid)) {
+            const picks = Array.isArray(msg.picks) ? [...new Set(msg.picks.filter((x) => typeof x === 'string' && x !== pid && this.players.has(x)))] : [];
+            this.votes.set(pid, picks); this.broadcast(); this.checkAllVoted();
+          }
+          break;
+        case 'settings':
+          if (isHost && this.phase === 'lobby') {
+            if (ROUND_OPTS.includes(msg.rounds)) this.settings.rounds = msg.rounds;
+            if (SECS_OPTS.includes(msg.seconds)) this.settings.seconds = msg.seconds;
+            this.broadcast();
+          }
+          break;
+        case 'start': if (isHost) this.start(); break;
+        case 'reveal': if (isHost && this.phase === 'round') this.doReveal(); break;
+        case 'next': if (isHost && this.phase === 'reveal') this.next(); break;
+        case 'lobby': if (isHost && this.phase === 'end') this.toLobby(); break;
+      }
+    },
+    uniqueCount(ps) { const u = new Set(); ps.forEach((p) => p.songs.forEach((s) => u.add(s.id))); return u.size; },
+    canStart() {
+      const ps = [...this.players.values()].filter((p) => p.connected);
+      if (ps.length < 2) return { ok: false, why: 'Mande o convite: precisa de pelo menos mais uma pessoa.' };
+      if (ps.filter((p) => p.songs.length > 0).length < 2) return { ok: false, why: 'Pelo menos duas pessoas precisam colocar músicas na fita.' };
+      const uniq = this.uniqueCount(ps);
+      if (uniq < 3) return { ok: false, why: 'Coloquem pelo menos 3 músicas no total.' };
+      const notReady = ps.filter((p) => !p.ready).length;
+      const total = this.settings.rounds === 0 ? uniq : Math.min(this.settings.rounds, uniq);
+      return { ok: true, why: (notReady ? `${plural(notReady, 'pessoa ainda não marcou', 'pessoas ainda não marcaram')} que a fita está pronta. ` : 'Todo mundo pronto. ') + `${plural(total, 'faixa', 'faixas')} nesta partida.` };
+    },
+    start() {
+      if (this.phase !== 'lobby' || !this.canStart().ok) return;
+      const live = [...this.players.values()].filter((p) => p.connected);
+      const pool = new Map();
+      for (const p of live) for (const s of p.songs) {
+        let e = pool.get(s.id);
+        if (!e) { e = { trackId: s.id, title: s.title, thumb: s.thumb, owners: new Set() }; pool.set(s.id, e); }
+        e.owners.add(p.id);
+        if (!e.title && s.title) { e.title = s.title; e.thumb = s.thumb; }
+      }
+      const want = this.settings.rounds === 0 ? pool.size : Math.min(this.settings.rounds, pool.size);
+      // Round-robin over players so everyone's songs show up about equally; shared songs go first.
+      const queues = new Map();
+      for (const p of live) {
+        const mine = shuffle([...pool.values()].filter((e) => e.owners.has(p.id)));
+        mine.sort((a, b) => (b.owners.size > 1) - (a.owners.size > 1));
+        if (mine.length) queues.set(p.id, mine);
+      }
+      const used = new Set(); const chosen = [];
+      let turn = shuffle([...queues.keys()]);
+      while (chosen.length < want && turn.length) {
+        for (const id of turn) {
+          if (chosen.length >= want) break;
+          const q = queues.get(id);
+          while (q.length && used.has(q[0].trackId)) q.shift();
+          if (q.length) { const e = q.shift(); used.add(e.trackId); chosen.push(e); }
+        }
+        turn = turn.filter((id) => queues.get(id).some((e) => !used.has(e.trackId)));
+      }
+      this.rounds = shuffle(chosen).map((e) => ({ trackId: e.trackId, title: e.title, thumb: e.thumb, owners: [...e.owners] }));
+      this.pairs = this.computePairs(live);
+      for (const p of this.players.values()) { p.score = 0; p.stats = { hits: 0, misses: 0, fooled: 0 }; }
+      this.end = null;
+      this.startRound(0);
+    },
+    computePairs(ps) {
+      let best = null;
+      for (let i = 0; i < ps.length; i++) {
+        const a = new Set(ps[i].songs.map((s) => s.id));
+        for (let j = i + 1; j < ps.length; j++) {
+          const n = ps[j].songs.filter((s) => a.has(s.id)).length;
+          if (n > 0 && (!best || n > best.n)) best = { ids: [ps[i].id, ps[j].id], n };
+        }
+      }
+      return best;
+    },
+    startRound(i) {
+      clearTimeout(this.timer);
+      this.idx = i; this.votes = new Map(); this.phase = 'round'; this.reveal = null;
+      const secs = this.settings.seconds;
+      this.deadline = secs ? Date.now() + secs * 1000 : 0;
+      if (secs) this.timer = setTimeout(() => this.doReveal(), secs * 1000);
+      this.broadcast();
+    },
+    checkAllVoted() {
+      if (this.phase !== 'round') return;
+      const live = [...this.players.values()].filter((p) => p.connected);
+      if (live.length && live.every((p) => this.votes.has(p.id))) {
+        const n = this.idx;
+        setTimeout(() => { if (this.phase === 'round' && this.idx === n) this.doReveal(); }, 900);
+      }
+    },
+    doReveal() {
+      if (this.phase !== 'round') return;
+      clearTimeout(this.timer);
+      const r = this.rounds[this.idx];
+      const owners = new Set(r.owners);
+      const voters = [...this.votes.keys()];
+      const rows = [];
+      for (const pid of this.order) {
+        const p = this.players.get(pid); if (!p) continue;
+        const voted = this.votes.has(pid);
+        const picks = this.votes.get(pid) || [];
+        let hits = 0, misses = 0;
+        for (const q of picks) { if (owners.has(q)) hits++; else misses++; }
+        const target = [...owners].filter((o) => o !== pid);
+        const exact = voted && target.length > 0 && misses === 0 && hits === target.length;
+        let fooled = 0;
+        if (owners.has(pid)) for (const v of voters) if (v !== pid && !this.votes.get(v).includes(pid)) fooled++;
+        const delta = Math.max(0, hits * PTS.hit + misses * PTS.miss) + (exact ? PTS.exact : 0) + fooled * PTS.fooled;
+        p.score += delta; p.stats.hits += hits; p.stats.misses += misses; p.stats.fooled += fooled;
+        rows.push({ id: pid, voted, picks, hits, misses, exact, fooled, delta, owner: owners.has(pid) });
+      }
+      this.reveal = { owners: [...owners], rows };
+      this.phase = 'reveal';
+      this.broadcast();
+    },
+    next() {
+      if (this.idx + 1 < this.rounds.length) { this.startRound(this.idx + 1); return; }
+      clearTimeout(this.timer);
+      const ps = [...this.players.values()];
+      const best = (key) => {
+        const max = Math.max(0, ...ps.map((p) => p.stats[key]));
+        return max > 0 ? { ids: ps.filter((p) => p.stats[key] === max).map((p) => p.id), n: max } : null;
+      };
+      this.end = { detective: best('hits'), poker: best('fooled'), twins: this.pairs };
+      this.phase = 'end';
+      this.broadcast();
+    },
+    toLobby() {
+      clearTimeout(this.timer);
+      for (const [id, p] of [...this.players]) { if (!p.connected) { this.players.delete(id); } }
+      this.order = this.order.filter((id) => this.players.has(id));
+      for (const p of this.players.values()) { p.score = 0; p.ready = false; }
+      this.phase = 'lobby'; this.rounds = []; this.idx = -1; this.reveal = null; this.end = null; this.votes = new Map();
+      this.broadcast();
+    },
+    stateFor(pid) {
+      const players = this.order.map((id) => this.players.get(id)).filter(Boolean).map((p) => ({
+        id: p.id, name: p.name, color: p.color, songs: p.songs.length, ready: p.ready, connected: p.connected, score: p.score, host: p.id === this.hostPid,
+      }));
+      const st = { t: 'state', code: this.code, phase: this.phase, settings: { ...this.settings }, players };
+      if (this.phase === 'lobby') st.canStart = this.canStart();
+      if (this.phase === 'round' || this.phase === 'reveal') {
+        const r = this.rounds[this.idx];
+        st.round = {
+          n: this.idx + 1, total: this.rounds.length, trackId: r.trackId, title: r.title, thumb: r.thumb,
+          remaining: this.phase === 'round' && this.deadline ? Math.max(0, this.deadline - Date.now()) : null,
+          voted: [...this.votes.keys()], mine: r.owners.includes(pid), myVote: this.votes.get(pid) || null,
+        };
+      }
+      if (this.phase === 'reveal') st.reveal = this.reveal;
+      if (this.phase === 'end') st.end = this.end;
+      return st;
+    },
+    broadcast() {
+      for (const p of this.players.values()) {
+        if (p.conn && p.conn.open) { try { p.conn.send(this.stateFor(p.id)); } catch (e) { /* dropped */ } }
+      }
+      onState(this.stateFor(this.hostPid));
+    },
+  };
+}
+let H = makeHost();
+
+/* ============ applying state ============ */
+function onState(st) {
+  const prev = S.pub; S.pub = st;
+  if (st.phase === 'round' && st.round && st.round.remaining != null) S.deadline = performance.now() + st.round.remaining;
+  else S.deadline = 0;
+  const me = st.players.find((p) => p.id === myPid);
+  document.documentElement.style.setProperty('--me', me ? me.color : COLORS[0]);
+  if (st.phase === 'lobby') { show('lobby'); renderLobby(prev); spStop(); }
+  else if (st.phase === 'round' || st.phase === 'reveal') { show('game'); renderGame(prev); }
+  else { show('end'); renderEnd(); spStop(); }
+  tick();
+}
+
+function renderLobby(prev) {
+  const st = S.pub; const isHost = S.role === 'host';
+  if (!prev || prev.phase !== 'lobby') { renderMySongs(); S.ready = !!(st.players.find((p) => p.id === myPid) || {}).ready; }
+  $('#room-code').textContent = st.code;
+  $('#pcount').textContent = st.players.length + '/' + MAX_PLAYERS;
+  $('#player-list').replaceChildren(...st.players.map((p) => {
+    const li = document.createElement('li');
+    li.className = 'prow' + (p.connected ? '' : ' off'); li.style.setProperty('--c', p.color);
+    li.innerHTML = `<span class="dot"></span><span class="pname"></span><span class="pmeta">${plural(p.songs, 'música', 'músicas')}</span><span class="pready${p.ready ? ' yes' : ''}">${p.ready ? 'pronto' : 'montando'}</span>`;
+    const nm = li.querySelector('.pname'); nm.textContent = p.name;
+    if (p.id === myPid) nm.insertAdjacentHTML('beforeend', ' <em>(você)</em>');
+    if (p.host) nm.insertAdjacentHTML('beforeend', ' <span class="tag">host</span>');
+    return li;
+  }));
+  const me = st.players.find((p) => p.id === myPid);
+  $('#ready-box').checked = !!(me && me.ready);
+  $('#set-rounds').value = String(st.settings.rounds);
+  $('#set-secs').value = String(st.settings.seconds);
+  $('#set-rounds').disabled = !isHost; $('#set-secs').disabled = !isHost;
+  $('#start-btn').hidden = !isHost;
+  $('#start-btn').disabled = !(st.canStart && st.canStart.ok);
+  $('#start-why').textContent = isHost ? (st.canStart ? st.canStart.why : '') : 'Quem criou a sala escolhe as opções e começa a partida.';
+}
+
+function playerById(id) { return S.pub.players.find((p) => p.id === id); }
+
+function renderGame(prev) {
+  const st = S.pub; const r = st.round; const isHost = S.role === 'host';
+  const newRound = !prev || !prev.round || prev.round.n !== r.n || prev.phase === 'lobby' || prev.phase === 'end';
+  if (newRound) {
+    S.picks = new Set(r.myVote || []); S.locked = !!r.myVote;
+    if (S.playHere) spLoad(r.trackId);
+  }
+  if (r.myVote && !S.locked) { S.locked = true; S.picks = new Set(r.myVote); }
+
+  const half = Math.ceil(r.total / 2); const sideB = r.n > half; const no = sideB ? r.n - half : r.n;
+  $('#side-label').firstChild.textContent = `Lado ${sideB ? 'B' : 'A'} · Faixa ${pad2(no)}`;
+  $('#round-of').textContent = `${r.n} de ${r.total}`;
+  $('#cass-side').textContent = sideB ? 'B' : 'A';
+  $('#cass-of').textContent = `FAIXA ${r.n} DE ${r.total}`;
+  $('#track-title').textContent = r.title || 'Faixa misteriosa';
+  const img = $('#track-thumb');
+  if (r.thumb) { if (img.getAttribute('src') !== r.thumb) img.src = r.thumb; img.hidden = false; $('#track-ph').hidden = true; }
+  else { img.hidden = true; $('#track-ph').hidden = false; }
+  $('#play-here').checked = S.playHere;
+  $('.player-box').hidden = !S.playHere;
+
+  const inRound = st.phase === 'round';
+  $('#round-panel').hidden = !inRound;
+  $('#reveal-panel').hidden = inRound;
+  $('#cass-label').style.setProperty('--c', inRound ? 'var(--accent)' : (playerById((st.reveal.owners || [])[0]) || {}).color || 'var(--accent)');
+  if (inRound) renderRoundPanel(); else renderReveal();
+  $('#host-round').hidden = !(isHost && inRound);
+  reels();
+}
+
+function renderRoundPanel() {
+  const st = S.pub; const r = st.round;
+  $('#mine-note').hidden = !r.mine;
+  const focused = document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.pid : null;
+  const others = st.players.filter((p) => p.id !== myPid);
+  $('#pick-grid').replaceChildren(...others.map((p) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'pick' + (p.connected ? '' : ' off'); b.dataset.pid = p.id;
+    b.style.setProperty('--c', p.color);
+    b.setAttribute('aria-pressed', S.picks.has(p.id) ? 'true' : 'false');
+    b.disabled = S.locked;
+    b.innerHTML = '<span class="n"></span><span class="ck" aria-hidden="true">✓</span>';
+    b.querySelector('.n').textContent = p.name;
+    return b;
+  }));
+  if (focused) { const f = $(`.pick[data-pid="${CSS.escape(focused)}"]`); if (f && !f.disabled) f.focus(); }
+  const lock = $('#lock-btn');
+  lock.disabled = S.locked || (!r.mine && S.picks.size === 0);
+  lock.textContent = S.locked ? 'Palpite cravado' : (r.mine && S.picks.size === 0 ? 'Confirmar: só eu tenho essa' : 'Cravar palpite');
+  const live = st.players.filter((p) => p.connected);
+  const voted = new Set(r.voted);
+  const vs = $('#vote-status');
+  vs.replaceChildren();
+  const label = document.createElement('span');
+  label.textContent = `${live.filter((p) => voted.has(p.id)).length} de ${live.length} cravaram:`;
+  vs.append(label);
+  for (const p of live) {
+    const c = document.createElement('span'); c.className = 'vchip' + (voted.has(p.id) ? ' done' : ''); c.style.setProperty('--c', p.color);
+    c.innerHTML = '<span class="dot"></span><span></span>'; c.lastChild.textContent = p.id === myPid ? 'você' : p.name;
+    vs.append(c);
+  }
+}
+
+function renderReveal() {
+  const st = S.pub; const rv = st.reveal; const r = st.round; const isHost = S.role === 'host';
+  const owners = rv.owners.map(playerById).filter(Boolean);
+  $('#reveal-title').textContent = owners.length > 1 ? 'Essa estava em mais de uma fita' : 'Essa era de…';
+  $('#owners').replaceChildren(...owners.map((p) => {
+    const o = document.createElement('span'); o.className = 'owner'; o.style.setProperty('--c', p.color);
+    o.innerHTML = '<span class="dot"></span><span></span>'; o.lastChild.textContent = p.id === myPid ? p.name + ' (você)' : p.name;
+    return o;
+  }));
+  const ownerSet = new Set(rv.owners);
+  $('#reveal-rows').replaceChildren(...rv.rows.map((row) => {
+    const p = playerById(row.id); if (!p) return document.createComment('');
+    const li = document.createElement('li'); li.className = 'rrow';
+    li.innerHTML = `<div class="who"><span class="dot" style="--c:${esc(p.color)}"></span><span></span></div><div class="delta ${row.delta > 0 ? 'pos' : 'zero'}">${row.delta > 0 ? '+' : ''}${row.delta}</div><div class="detail"></div>`;
+    li.querySelector('.who span:last-child').textContent = p.id === myPid ? p.name + ' (você)' : p.name;
+    const d = li.querySelector('.detail');
+    if (row.owner) { const b = document.createElement('span'); b.className = 'badge'; b.textContent = 'tinha a música'; d.append(b); }
+    if (!row.voted) { const s = document.createElement('span'); s.textContent = 'não palpitou'; d.append(s); }
+    else if (!row.picks.length) { const s = document.createElement('span'); s.textContent = 'não marcou ninguém'; d.append(s); }
+    for (const id of row.picks) {
+      const q = playerById(id); if (!q) continue;
+      const c = document.createElement('span'); const hit = ownerSet.has(id);
+      c.className = 'gchip ' + (hit ? 'hit' : 'miss'); c.textContent = (hit ? '✓ ' : '✗ ') + q.name;
+      d.append(c);
+    }
+    if (row.exact) { const b = document.createElement('span'); b.className = 'badge gold'; b.textContent = 'na mosca'; d.append(b); }
+    if (row.fooled) { const s = document.createElement('span'); s.textContent = `enganou ${row.fooled}`; d.append(s); }
+    return li;
+  }));
+  renderBoard($('#board'));
+  const last = r.n === r.total;
+  $('#next-btn').hidden = !isHost;
+  $('#next-btn').textContent = last ? 'Ver o placar final' : 'Próxima faixa';
+  $('#next-wait').textContent = isHost ? '' : (last ? 'Última faixa. Esperando o host abrir o placar final…' : 'Esperando o host soltar a próxima faixa…');
+}
+
+function renderBoard(ol) {
+  const ps = [...S.pub.players].sort((a, b) => b.score - a.score);
+  ol.replaceChildren(...ps.map((p, i) => {
+    const li = document.createElement('li'); if (p.id === myPid) li.className = 'me';
+    li.innerHTML = `<span class="rk">${i + 1}º</span><span class="dot" style="--c:${esc(p.color)}"></span><span class="nm"></span><span class="sc">${p.score}</span>`;
+    li.querySelector('.nm').textContent = p.name;
+    return li;
+  }));
+}
+
+function renderEnd() {
+  const st = S.pub; const isHost = S.role === 'host';
+  const ps = [...st.players].sort((a, b) => b.score - a.score);
+  $('#podium').replaceChildren(...ps.map((p, i) => {
+    const li = document.createElement('li'); li.style.setProperty('--c', p.color);
+    li.innerHTML = `<span class="pos">${i + 1}º</span><span class="nm"></span><span class="sc">${p.score}</span>`;
+    li.querySelector('.nm').textContent = p.id === myPid ? p.name + ' (você)' : p.name;
+    return li;
+  }));
+  const names = (ids) => ids.map((id) => (playerById(id) || {}).name).filter(Boolean).join(' e ');
+  const awards = [];
+  const e = st.end || {};
+  if (e.detective) awards.push({ lbl: 'Detetive', who: names(e.detective.ids), why: `Acertou ${plural(e.detective.n, 'dono de música', 'donos de música')}.` });
+  if (e.poker) awards.push({ lbl: 'Cara de paisagem', who: names(e.poker.ids), why: `Passou despercebido ${plural(e.poker.n, 'vez', 'vezes')} com as próprias músicas.` });
+  if (e.twins) awards.push({ lbl: 'Fones gêmeos', who: names(e.twins.ids), why: `${plural(e.twins.n, 'música', 'músicas')} em comum nas fitas.` });
+  $('#awards').replaceChildren(...awards.map((a) => {
+    const c = document.createElement('section'); c.className = 'card award';
+    c.innerHTML = '<span class="lbl"></span><p></p><small></small>';
+    c.querySelector('.lbl').textContent = a.lbl; c.querySelector('p').textContent = a.who; c.querySelector('small').textContent = a.why;
+    return c;
+  }));
+  $('#again-btn').hidden = !isHost;
+  $('#again-wait').textContent = isHost ? '' : 'Se o host quiser outra rodada, você volta pra sala automaticamente.';
+}
+
+/* ============ timer ============ */
+function tick() {
+  const st = S.pub; const c = $('#counter'); if (!c) return;
+  let txt = '---', frac = 1, low = false, idle = true;
+  if (st && st.phase === 'round' && S.deadline) {
+    const rem = Math.max(0, S.deadline - performance.now());
+    const secs = Math.ceil(rem / 1000);
+    txt = String(Math.min(999, secs)).padStart(3, '0');
+    frac = st.settings.seconds ? rem / (st.settings.seconds * 1000) : 1;
+    low = secs <= 5; idle = false;
+  }
+  const spans = c.children;
+  for (let i = 0; i < 3; i++) if (spans[i].textContent !== txt[i]) spans[i].textContent = txt[i];
+  c.classList.toggle('low', low); c.classList.toggle('idle', idle);
+  $('#timebar-fill').style.transform = `scaleX(${Math.max(0, Math.min(1, frac))})`;
+}
+setInterval(tick, 200);
+
+/* ============ Spotify player ============ */
+const SP = { api: null, ctrl: null, creating: false, current: null, want: null, playOnReady: false, playing: false };
+window.onSpotifyIframeApiReady = (api) => { SP.api = api; if (SP.want && S.playHere) spLoad(SP.want); };
+function spLoad(id) {
+  SP.want = id;
+  if (!SP.api) { $('#sp-status').textContent = 'Carregando o player do Spotify…'; return; }
+  const uri = 'spotify:track:' + id;
+  if (!SP.ctrl) {
+    if (SP.creating) return;
+    SP.creating = true;
+    const el = document.createElement('div');
+    $('#sp-slot').replaceChildren(el);
+    SP.api.createController(el, { uri, width: '100%', height: window.innerWidth < 600 ? 80 : 152 }, (ctrl) => {
+      SP.ctrl = ctrl; SP.creating = false; SP.current = id; SP.playOnReady = true;
+      ctrl.addListener('ready', () => { if (SP.playOnReady) { SP.playOnReady = false; try { ctrl.play(); } catch (e) { /* user can press play */ } } });
+      ctrl.addListener('playback_update', (ev) => { SP.playing = !!(ev && ev.data && !ev.data.isPaused); reels(); });
+      $('#sp-status').textContent = 'Se a música não começar sozinha, aperte o play no player.';
+      if (SP.want !== id) spLoad(SP.want);
+    });
+  } else if (SP.current !== id) {
+    SP.current = id; SP.playOnReady = true;
+    SP.ctrl.loadUri(uri);
+    setTimeout(() => { if (SP.playOnReady && SP.current === id) { SP.playOnReady = false; try { SP.ctrl.play(); } catch (e) { /* ignore */ } } }, 1800);
+  } else {
+    try { SP.ctrl.play(); } catch (e) { /* ignore */ }
+  }
+}
+function spStop() { if (SP.ctrl) { try { SP.ctrl.pause(); } catch (e) { /* ignore */ } } SP.playing = false; reels(); }
+function reels() {
+  const st = S.pub;
+  const on = st && (st.phase === 'round' || st.phase === 'reveal') && (S.playHere ? SP.playing : st.phase === 'round');
+  $('#cassette').classList.toggle('spinning', !!on);
+}
+
+/* ============ UI wiring ============ */
+$('#name-input').value = S.name;
+$('#create-btn').addEventListener('click', createRoom);
+$('#join-btn').addEventListener('click', () => joinRoom($('#code-input').value));
+$('#code-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') joinRoom($('#code-input').value); });
+$('#name-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') { const code = $('#code-input').value.trim(); if (code) joinRoom(code); else createRoom(); } });
+$('#code-input').addEventListener('input', (e) => { e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 5); });
+
+$('#add-btn').addEventListener('click', () => addFromText($('#paste').value));
+$('#paste').addEventListener('paste', () => setTimeout(() => addFromText($('#paste').value), 0));
+$('#song-list').addEventListener('click', (e) => {
+  const b = e.target.closest('.x'); if (!b) return;
+  S.songs = S.songs.filter((s) => s.id !== b.dataset.id);
+  saveSongs(); renderMySongs(); sendSongsSoon();
+});
+let clearArmed = 0;
+$('#clear-songs').addEventListener('click', (e) => {
+  if (!S.songs.length) return;
+  if (!clearArmed) { e.target.textContent = 'Clique de novo pra apagar'; clearArmed = setTimeout(() => { clearArmed = 0; e.target.textContent = 'Apagar todas'; }, 3000); return; }
+  clearTimeout(clearArmed); clearArmed = 0; e.target.textContent = 'Apagar todas';
+  S.songs = []; saveSongs(); renderMySongs(); sendSongsSoon();
+});
+$('#ready-box').addEventListener('change', (e) => { S.ready = e.target.checked; sendHost({ t: 'ready', v: S.ready }); });
+$('#set-rounds').addEventListener('change', () => sendHost({ t: 'settings', rounds: Number($('#set-rounds').value), seconds: Number($('#set-secs').value) }));
+$('#set-secs').addEventListener('change', () => sendHost({ t: 'settings', rounds: Number($('#set-rounds').value), seconds: Number($('#set-secs').value) }));
+$('#start-btn').addEventListener('click', () => sendHost({ t: 'start' }));
+$('#copy-link').addEventListener('click', async () => {
+  const link = inviteLink();
+  try { await navigator.clipboard.writeText(link); toast('Link copiado. Manda no grupo!'); }
+  catch (e) { toast('Copie este link: ' + link); }
+});
+$('#leave-lobby').addEventListener('click', leave);
+$('#leave-end').addEventListener('click', leave);
+
+$('#pick-grid').addEventListener('click', (e) => {
+  const b = e.target.closest('.pick'); if (!b || S.locked) return;
+  const id = b.dataset.pid;
+  if (S.picks.has(id)) S.picks.delete(id); else S.picks.add(id);
+  renderRoundPanel();
+});
+$('#lock-btn').addEventListener('click', () => {
+  const r = S.pub && S.pub.round; if (!r || S.locked) return;
+  S.locked = true;
+  sendHost({ t: 'vote', n: r.n, picks: [...S.picks] });
+  renderRoundPanel();
+});
+$('#reveal-now').addEventListener('click', () => sendHost({ t: 'reveal' }));
+$('#next-btn').addEventListener('click', () => sendHost({ t: 'next' }));
+$('#again-btn').addEventListener('click', () => sendHost({ t: 'lobby' }));
+$('#play-here').addEventListener('change', (e) => {
+  S.playHere = e.target.checked; ls.set('fa-play', S.playHere);
+  $('.player-box').hidden = !S.playHere;
+  if (S.playHere && S.pub && S.pub.round) spLoad(S.pub.round.trackId); else spStop();
+  reels();
+});
+
+window.addEventListener('beforeunload', (e) => {
+  if (S.role === 'host' && S.pub && S.pub.players.length > 1) { e.preventDefault(); e.returnValue = ''; }
+});
+
+// Invite link: ?sala=CODE
+(() => {
+  let code = '';
+  try { code = (new URL(location.href).searchParams.get('sala') || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 5); } catch (e) { /* ignore */ }
+  if (code) {
+    $('#code-input').value = code;
+    homeMsg('Você foi convidado pra sala ' + code + '. Coloque seu nome e clique em Entrar.');
+    (S.name ? $('#join-btn') : $('#name-input')).focus();
+  }
+  renderMySongs();
+})();
+</script>
+<script src="https://open.spotify.com/embed/iframe-api/v1" async></script>
+</body>
+</html>
