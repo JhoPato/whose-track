@@ -1,6 +1,6 @@
 # Whose Track?
 
-A music party game for friends. Everyone connects Spotify, the game loads the songs each person plays most, plays them one at a time, and the group guesses whose song each one is. First to the target score wins. English and Portuguese (EN/PT switch on every screen).
+A music party game for friends. Everyone connects Spotify, the game grabs a random mix of each person's music, plays the songs one at a time, and the group guesses whose song each one is. First to the target score wins. English and Portuguese (EN/PT switch on every screen).
 
 Live at https://whosetrack.discloud.dev/
 
