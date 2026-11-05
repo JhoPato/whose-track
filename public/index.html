@@ -146,7 +146,7 @@ details.help ul{margin:8px 0 0;padding-left:18px;display:grid;gap:6px;color:var(
 details.help b{color:var(--ink)}
 kbd{font:600 12px/1 var(--font-mono);background:var(--paper-shade);border:1px solid var(--ink-soft);border-bottom-width:2px;border-radius:4px;padding:2px 5px;color:var(--ink)}
 .songs{list-style:none;margin:16px 0 0;padding:0;border-top:2px solid var(--ink)}
-.song{display:grid;grid-template-columns:28px 36px minmax(0,1fr) 32px;gap:10px;align-items:center;min-height:46px;padding:5px 0;border-bottom:1px solid var(--rule)}
+.song{display:grid;grid-template-columns:28px 36px minmax(0,1fr);gap:10px;align-items:center;min-height:46px;padding:5px 0;border-bottom:1px solid var(--rule)}
 .song .num{font:500 12px/1 var(--font-mono);color:var(--ink-soft);text-align:right}
 .song img,.song .ph{width:36px;height:36px;border-radius:4px;object-fit:cover;background:var(--paper-shade)}
 .song .stitle{font-family:var(--font-hand);font-weight:700;font-size:17px;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -292,6 +292,11 @@ kbd{font:600 12px/1 var(--font-mono);background:var(--paper-shade);border:1px so
 .cb-text{font-size:18px}
 .cb-text.err{color:var(--bad);font-weight:700}
 
+.connected{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px}
+.mysongs summary{cursor:pointer;font-weight:700;font-size:14px;color:var(--ink-soft)}
+.mysongs .songs{margin-top:10px}
+.board li{background:linear-gradient(to right,color-mix(in srgb,var(--c) 26%,var(--field)) var(--fill,0%),var(--field) var(--fill,0%))}
+
 /* ---------- language switch ---------- */
 .langsw{display:inline-flex;flex:none;border:2px solid var(--on-desk-soft);border-radius:8px;overflow:hidden}
 .langsw button{background:transparent;border:0;color:var(--on-desk-soft);font:700 12px/1 var(--font-mono);letter-spacing:.08em;padding:8px 10px;cursor:pointer}
@@ -387,67 +392,39 @@ kbd{font:600 12px/1 var(--font-mono);background:var(--paper-shade);border:1px so
     <section class="card tape-card" aria-labelledby="tape-h" style="--c:var(--me)">
       <div class="stripe"></div>
       <h2 id="tape-h"><span data-i18n="tape.title"></span> <small id="my-count"></small></h2>
-      <p class="intro" data-i18n="tape.intro"></p>
-      <div class="spc" id="sp-connect-box" hidden>
-        <div class="spc-row">
-          <div class="field">
-            <label for="sp-range" data-i18n="spc.range"></label>
-            <select id="sp-range">
-              <option value="short_term" data-i18n="spc.short"></option>
-              <option value="medium_term" data-i18n="spc.medium" selected></option>
-              <option value="long_term" data-i18n="spc.long"></option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="sp-count" data-i18n="spc.count"></label>
-            <select id="sp-count">
-              <option value="10">10</option><option value="15" selected>15</option><option value="20">20</option><option value="30">30</option><option value="50">50</option>
-            </select>
-          </div>
-        </div>
-        <a class="btn spotify big" id="sp-connect" href="#" target="_blank"><span class="spdot" aria-hidden="true"></span><span data-i18n="spc.btn"></span></a>
-        <p class="msg" id="spc-msg" role="status"></p>
+      <div id="tape-off" class="spc">
+        <p class="intro" data-i18n="tape.introOff"></p>
+        <a class="btn spotify big sp-link" id="sp-connect" href="#" target="_blank"><span class="spdot" aria-hidden="true"></span><span data-i18n="spc.btn"></span></a>
+        <p class="msg err" id="sp-notsetup" data-i18n="spc.notSetup" hidden></p>
         <p class="spc-note" data-i18n="spc.note"></p>
-        <div class="or" data-i18n="spc.orPaste"></div>
       </div>
-      <div class="field">
-        <label for="paste" data-i18n="tape.links"></label>
-        <textarea id="paste" placeholder="https://open.spotify.com/track/..."></textarea>
+      <div id="tape-on" class="spc" hidden>
+        <p class="connected"><span class="spdot" aria-hidden="true"></span><span id="tape-on-text"></span></p>
+        <details class="mysongs">
+          <summary data-i18n="tape.see"></summary>
+          <ol class="songs" id="song-list"></ol>
+        </details>
+        <div class="tape-foot">
+          <a class="linkbtn sp-link" id="sp-refresh" href="#" target="_blank" data-i18n="spc.refresh"></a>
+          <button class="linkbtn" id="sp-disconnect" type="button" data-i18n="spc.disconnect"></button>
+        </div>
       </div>
-      <div class="addrow">
-        <button class="btn primary" id="add-btn" data-i18n="tape.add"></button>
-        <p class="msg" id="paste-msg" role="status"></p>
-      </div>
-      <details class="help">
-        <summary data-i18n="tape.helpSum"></summary>
-        <ul>
-          <li data-i18n-html="tape.help1"></li>
-          <li data-i18n-html="tape.help2"></li>
-          <li data-i18n="tape.help3"></li>
-        </ul>
-      </details>
-      <ol class="songs" id="song-list"></ol>
-      <p class="empty-songs" id="song-empty" data-i18n="tape.empty"></p>
-      <div class="tape-foot">
-        <span class="muted" style="font-size:13px" data-i18n="tape.max"></span>
-        <button class="linkbtn" id="clear-songs"></button>
-      </div>
+      <p class="msg" id="spc-msg" role="status"></p>
     </section>
 
     <div class="side">
       <section class="card" aria-labelledby="room-h">
         <h2 id="room-h"><span data-i18n="room.title"></span> <small id="pcount"></small></h2>
         <ul class="plist" id="player-list"></ul>
-        <label class="readyrow"><input type="checkbox" id="ready-box"> <span data-i18n="room.readyBox"></span></label>
       </section>
 
       <section class="card" aria-labelledby="match-h">
         <h2 id="match-h" data-i18n="match.title"></h2>
         <div class="settings-grid">
           <div class="field">
-            <label for="set-rounds" data-i18n="match.tracks"></label>
-            <select id="set-rounds">
-              <option value="8">8</option><option value="12">12</option><option value="16">16</option><option value="20">20</option><option value="0" data-i18n="match.all"></option>
+            <label for="set-target" data-i18n="match.target"></label>
+            <select id="set-target">
+              <option value="500">500</option><option value="1000">1000</option><option value="1500">1500</option><option value="2000">2000</option>
             </select>
           </div>
           <div class="field">
@@ -464,6 +441,7 @@ kbd{font:600 12px/1 var(--font-mono);background:var(--paper-shade);border:1px so
       <details class="rules" open>
         <summary data-i18n="rules.title"></summary>
         <ul>
+          <li data-i18n="rules.0"></li>
           <li data-i18n="rules.1"></li>
           <li data-i18n-html="rules.2"></li>
           <li data-i18n-html="rules.3"></li>
@@ -530,7 +508,7 @@ kbd{font:600 12px/1 var(--font-mono);background:var(--paper-shade);border:1px so
         <h2 id="reveal-title"></h2>
         <div class="owners" id="owners"></div>
         <ul class="rrows" id="reveal-rows"></ul>
-        <h3 class="reveal-h3" data-i18n="rev.board"></h3>
+        <h3 class="reveal-h3" id="board-h"></h3>
         <ol class="board" id="board"></ol>
         <div class="end-actions">
           <button class="btn primary big" id="next-btn" hidden></button>
@@ -592,14 +570,12 @@ const MAX_SONGS = 50;
 const PTS = { hit: 100, miss: -50, exact: 50, fooled: 40 };
 const COLORS = ['#ff6b5a', '#ffcf3f', '#36d39b', '#4cc3ff', '#b48cff', '#ff7fc8', '#a6e34b', '#ff9f43'];
 const CODE_CHARS = 'BCDFGHJKLMNPQRSTVWXZ23456789';
-const ROUND_OPTS = [8, 12, 16, 20, 0];
+const TARGET_OPTS = [500, 1000, 1500, 2000];
 const SECS_OPTS = [20, 30, 45, 60, 0];
 const TRACK_ID = /^[A-Za-z0-9]{22}$/;
-// Optional "pull my top songs" sign-in. Public Client ID from developer.spotify.com (not a secret).
-// Leave empty to hide the Spotify button; everyone then pastes links.
+// Public Client ID from developer.spotify.com (not a secret). Players load their tape by signing in.
 const SPOTIFY_CLIENT_ID = '';
-const SP_RANGES = ['short_term', 'medium_term', 'long_term'];
-const SP_COUNTS = [10, 15, 20, 30, 50];
+const SP_LIMIT = 25; // songs pulled per player: top tracks of the last ~6 months
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -622,8 +598,8 @@ const I18N = {
     'lang.group': 'Language',
     'home.tagline': 'A song plays. Everyone guesses whose headphones it came from.',
     'home.step1': '<b>Someone creates a room</b> and sends the link to the group.',
-    'home.step2': '<b>Everyone pastes links to songs</b> they’ve been listening to on Spotify. Nobody sees anyone else’s list.',
-    'home.step3': '<b>Every track, everyone guesses</b> whose song it is. If it’s yours, you score when nobody suspects you.',
+    'home.step2': '<b>Everyone connects Spotify.</b> The game loads the songs each person plays most. Nobody sees anyone else’s list.',
+    'home.step3': '<b>Every track, everyone guesses</b> whose song it is. First to the target score wins.',
     'home.entry': 'Join the game',
     'home.name': 'Your name',
     'home.namePh': 'What your friends call you',
@@ -651,56 +627,51 @@ const I18N = {
     'toast.copied': 'Link copied. Send it to the group!',
     'toast.copyThis': 'Copy this link: {link}',
     'tape.title': 'Your tape',
-    'tape.intro': 'Paste links to songs you actually listen to. 8 to 15 is a good amount. Only you can see this list.',
-    'tape.links': 'Spotify links',
-    'tape.add': 'Add to tape',
-    'tape.helpSum': 'How to copy several songs from Spotify',
-    'tape.help1': '<b>On a computer:</b> open a playlist of what you play most (your Wrapped playlist, “On Repeat” or Liked Songs). Click a song, press <kbd>Ctrl</kbd>+<kbd>A</kbd> to select them all (or hold <kbd>Ctrl</kbd> and click the ones you want), then <kbd>Ctrl</kbd>+<kbd>C</kbd> and paste here. On a Mac, use <kbd>Cmd</kbd>.',
-    'tape.help2': '<b>On a phone:</b> tap <b>⋯</b> on the song, then <b>Share</b> and <b>Copy link</b>. Paste them here one at a time.',
-    'tape.help3': 'Playlist or album links don’t work, only song links.',
-    'tape.empty': 'Blank tape. Paste some links above.',
-    'tape.max': 'Up to 50 songs.',
-    'tape.clear': 'Delete all',
-    'tape.clearConfirm': 'Click again to delete',
+    'tape.introOff': 'Connect Spotify and the game loads the songs you’ve played most in the last 6 months. Only you can see them.',
+    'tape.on': ['Spotify connected · {n} song on your tape', 'Spotify connected · {n} songs on your tape'],
+    'tape.see': 'See my songs',
     'songs': ['{n} song', '{n} songs'],
-    'song.notFound': 'Couldn’t find this song on Spotify',
-    'song.loading': 'loading…',
-    'song.fallback': 'Song {id}',
-    'song.remove': 'Remove {title} from the tape',
-    'paste.short': 'Short links (spotify.link) don’t work. In Spotify, use “Copy song link”.',
-    'paste.other': 'That’s a playlist or album link. Open it, select the songs and copy those.',
-    'paste.none': 'No Spotify song links in there.',
-    'paste.added': ['{n} song added', '{n} songs added'],
-    'paste.dup': ['{n} duplicate skipped', '{n} duplicates skipped'],
-    'paste.cut': '{n} left out (the limit is {max})',
-    'paste.otherSkipped': 'playlist and album links were skipped',
+    'spc.btn': 'Connect Spotify',
+    'spc.note': 'Only Spotify accounts on this game’s guest list can connect (up to 5 people).',
+    'spc.notSetup': 'Spotify isn’t set up on this site yet.',
+    'spc.refresh': 'Reload from Spotify',
+    'spc.disconnect': 'Disconnect',
+    'spc.waiting': 'Finish signing in on the Spotify tab, then come back here.',
+    'spc.loaded': ['{n} song loaded from your Spotify.', '{n} songs loaded from your Spotify.'],
+    'spc.err.denied': 'Spotify sign-in was cancelled.',
+    'spc.err.notListed': 'This Spotify account isn’t on the game’s guest list yet. Ask the game’s owner to add your Spotify email.',
+    'spc.err.expired': 'This sign-in expired. Go back to the game and try again.',
+    'spc.err.empty': 'Spotify doesn’t have enough listening history for this account yet.',
+    'spc.err.failed': 'Couldn’t get your songs from Spotify. Try again.',
+    'cb.loading': 'Getting your top songs…',
+    'cb.done': 'Done! Your songs are on your tape. You can close this tab and go back to the game.',
+    'cb.close': 'Close this tab',
     'room.title': 'In the room',
     'room.you': '(you)',
     'room.host': 'host',
     'room.ready': 'ready',
-    'room.picking': 'picking',
-    'room.readyBox': 'My tape is ready',
+    'room.waiting': 'not connected',
     'match.title': 'Game',
-    'match.tracks': 'Tracks',
+    'match.target': 'Points to win',
     'match.time': 'Time to guess',
-    'match.all': 'All',
     'match.noLimit': 'No limit',
     'match.start': 'Start the tape',
     'match.guest': 'The host picks the options and starts the game.',
     'start.needPlayer': 'Send the invite: you need at least one more person.',
-    'start.needSongs': 'At least two people need songs on their tape.',
-    'start.needThree': 'Add at least 3 songs in total.',
-    'start.notReady': ['{n} person hasn’t marked their tape ready. ', '{n} people haven’t marked their tape ready. '],
-    'start.allReady': 'Everyone’s ready. ',
-    'start.tracks': ['{n} track this game.', '{n} tracks this game.'],
+    'start.needSongs': 'At least two people need to connect Spotify.',
+    'start.needThree': 'The tapes need at least 3 songs in total.',
+    'start.notReady': ['{n} person hasn’t connected Spotify yet. ', '{n} people haven’t connected Spotify yet. '],
+    'start.allReady': 'Everyone’s connected. ',
+    'start.goal': 'First to {n} points wins.',
     'rules.title': 'Scoring',
+    'rules.0': 'First player to reach the target score wins.',
     'rules.1': 'You can pick more than one person: sometimes the same song is on two tapes.',
     'rules.2': '<span class="pts">+100</span> for each right person, <span class="pts">−50</span> for each wrong one.',
     'rules.3': '<span class="pts">+50</span> for naming exactly who has the song.',
     'rules.4': 'If it’s your song: <span class="pts">+40</span> for each player who didn’t suspect you.',
-    'game.side': 'Side {side} · Track {no}',
-    'game.of': '{n} of {total}',
-    'game.trackOf': 'TRACK {n} OF {total}',
+    'game.track': 'Side {side} · Track {no}',
+    'game.goal': 'First to {n}',
+    'game.trackNo': 'TRACK {n}',
     'game.mystery': 'Mystery track',
     'game.timer': 'Time left',
     'game.deck': 'Now playing',
@@ -724,11 +695,12 @@ const I18N = {
     'rev.nobody': 'picked nobody',
     'rev.exact': 'bullseye',
     'rev.fooled': 'fooled {n}',
-    'rev.board': 'Scoreboard',
+    'rev.board': 'Scoreboard · first to {n}',
     'rev.next': 'Next track',
     'rev.final': 'See final scores',
     'rev.wait': 'Waiting for the host to play the next track…',
-    'rev.waitLast': 'Last track. Waiting for the host to open the final scores…',
+    'rev.waitLast': 'We have a winner. Waiting for the host to open the final scores…',
+    'rev.waitOut': 'That was the last song on the tapes. Waiting for the host to open the final scores…',
     'end.title': 'End of<span>the tape</span>',
     'end.board': 'Final scores',
     'aw.det': 'Detective',
@@ -745,32 +717,13 @@ const I18N = {
     'ban.reconnect': 'Reconnect',
     'ban.leave': 'Leave',
     'ban.retry': 'Try again',
-    'spc.btn': 'Pull my top songs from Spotify',
-    'spc.range': 'Listening period',
-    'spc.short': 'Last 4 weeks',
-    'spc.medium': 'Last 6 months',
-    'spc.long': 'Last 12 months',
-    'spc.count': 'How many',
-    'spc.note': 'Only works for Spotify accounts on this game’s guest list (up to 5 people). Everyone else can paste links below.',
-    'spc.orPaste': 'or paste links',
-    'spc.waiting': 'Finish signing in on the Spotify tab, then come back here.',
-    'spc.added': ['{n} song added from your Spotify', '{n} songs added from your Spotify'],
-    'spc.noneNew': 'Those songs were already on your tape.',
-    'spc.err.denied': 'Spotify sign-in was cancelled.',
-    'spc.err.notListed': 'This Spotify account isn’t on the game’s guest list yet. Ask the game’s owner to add your Spotify email, or paste links instead.',
-    'spc.err.expired': 'This sign-in expired. Go back to the game and try again.',
-    'spc.err.empty': 'Spotify has no top songs for that period yet. Try a longer period.',
-    'spc.err.failed': 'Couldn’t get your songs from Spotify. Try again, or paste links instead.',
-    'cb.loading': 'Getting your top songs…',
-    'cb.done': 'Done! Your songs are on your tape. You can close this tab and go back to the game.',
-    'cb.close': 'Close this tab',
   },
   pt: {
     'lang.group': 'Idioma',
     'home.tagline': 'Toca uma música. A galera tenta adivinhar de quem é o fone.',
     'home.step1': '<b>Alguém cria a sala</b> e manda o link pro grupo.',
-    'home.step2': '<b>Cada um cola links de músicas</b> que anda ouvindo no Spotify. Ninguém vê as músicas dos outros.',
-    'home.step3': '<b>A cada faixa, todo mundo palpita</b> de quem é aquela música. Quem tem a música ganha ponto se ninguém desconfiar.',
+    'home.step2': '<b>Todo mundo conecta o Spotify.</b> O jogo puxa as músicas que cada um mais ouve. Ninguém vê a lista dos outros.',
+    'home.step3': '<b>A cada faixa, todo mundo palpita</b> de quem é aquela música. Quem chegar primeiro na pontuação ganha.',
     'home.entry': 'Entrar no jogo',
     'home.name': 'Seu nome',
     'home.namePh': 'Como o grupo te chama',
@@ -798,56 +751,51 @@ const I18N = {
     'toast.copied': 'Link copiado. Manda no grupo!',
     'toast.copyThis': 'Copie este link: {link}',
     'tape.title': 'Sua fita',
-    'tape.intro': 'Cole links de músicas que você ouve de verdade. De 8 a 15 é um bom número. Só você vê essa lista.',
-    'tape.links': 'Links do Spotify',
-    'tape.add': 'Adicionar à fita',
-    'tape.helpSum': 'Como copiar várias músicas do Spotify',
-    'tape.help1': '<b>No computador:</b> abra uma playlist com o que você mais ouve (a do seu Wrapped, “No Repeat” ou suas Curtidas). Clique numa música, aperte <kbd>Ctrl</kbd>+<kbd>A</kbd> pra selecionar todas (ou segure <kbd>Ctrl</kbd> e clique nas que quiser), depois <kbd>Ctrl</kbd>+<kbd>C</kbd> e cole aqui. No Mac é <kbd>Cmd</kbd>.',
-    'tape.help2': '<b>No celular:</b> na música, toque em <b>⋯</b>, depois <b>Compartilhar</b> e <b>Copiar link</b>. Cole aqui uma de cada vez.',
-    'tape.help3': 'Links de playlist ou álbum inteiro não funcionam, só de músicas.',
-    'tape.empty': 'Fita virgem. Cole uns links aí em cima.',
-    'tape.max': 'Máximo de 50 músicas.',
-    'tape.clear': 'Apagar todas',
-    'tape.clearConfirm': 'Clique de novo pra apagar',
+    'tape.introOff': 'Conecte o Spotify e o jogo puxa as músicas que você mais ouviu nos últimos 6 meses. Só você vê essa lista.',
+    'tape.on': ['Spotify conectado · {n} música na sua fita', 'Spotify conectado · {n} músicas na sua fita'],
+    'tape.see': 'Ver minhas músicas',
     'songs': ['{n} música', '{n} músicas'],
-    'song.notFound': 'Não achei essa música no Spotify',
-    'song.loading': 'carregando…',
-    'song.fallback': 'Música {id}',
-    'song.remove': 'Tirar {title} da fita',
-    'paste.short': 'Links curtos (spotify.link) não funcionam. No Spotify, use “Copiar link da música”.',
-    'paste.other': 'Esse é link de playlist ou álbum. Abra, selecione as músicas e copie elas.',
-    'paste.none': 'Não achei nenhum link de música do Spotify aí.',
-    'paste.added': ['{n} música adicionada', '{n} músicas adicionadas'],
-    'paste.dup': ['{n} repetida ignorada', '{n} repetidas ignoradas'],
-    'paste.cut': '{n} ficaram de fora (limite de {max})',
-    'paste.otherSkipped': 'links de playlist e álbum foram ignorados',
+    'spc.btn': 'Conectar Spotify',
+    'spc.note': 'Só contas do Spotify na lista de convidados do jogo conseguem conectar (até 5 pessoas).',
+    'spc.notSetup': 'O Spotify ainda não foi configurado neste site.',
+    'spc.refresh': 'Puxar de novo do Spotify',
+    'spc.disconnect': 'Desconectar',
+    'spc.waiting': 'Termine o login na aba do Spotify e depois volte pra cá.',
+    'spc.loaded': ['{n} música carregada do seu Spotify.', '{n} músicas carregadas do seu Spotify.'],
+    'spc.err.denied': 'O login no Spotify foi cancelado.',
+    'spc.err.notListed': 'Essa conta do Spotify ainda não está na lista de convidados do jogo. Peça pro dono do jogo cadastrar seu e-mail do Spotify.',
+    'spc.err.expired': 'Esse login expirou. Volte pro jogo e tente de novo.',
+    'spc.err.empty': 'O Spotify ainda não tem histórico suficiente dessa conta.',
+    'spc.err.failed': 'Não consegui pegar suas músicas do Spotify. Tente de novo.',
+    'cb.loading': 'Pegando suas mais ouvidas…',
+    'cb.done': 'Pronto! Suas músicas estão na fita. Pode fechar esta aba e voltar pro jogo.',
+    'cb.close': 'Fechar esta aba',
     'room.title': 'Na sala',
     'room.you': '(você)',
     'room.host': 'host',
     'room.ready': 'pronto',
-    'room.picking': 'montando',
-    'room.readyBox': 'Minha fita está pronta',
+    'room.waiting': 'sem Spotify',
     'match.title': 'Partida',
-    'match.tracks': 'Faixas',
+    'match.target': 'Pontos pra ganhar',
     'match.time': 'Tempo pra palpitar',
-    'match.all': 'Todas',
     'match.noLimit': 'Sem limite',
     'match.start': 'Começar a fita',
     'match.guest': 'Quem criou a sala escolhe as opções e começa a partida.',
     'start.needPlayer': 'Mande o convite: precisa de pelo menos mais uma pessoa.',
-    'start.needSongs': 'Pelo menos duas pessoas precisam colocar músicas na fita.',
-    'start.needThree': 'Coloquem pelo menos 3 músicas no total.',
-    'start.notReady': ['{n} pessoa ainda não marcou que a fita está pronta. ', '{n} pessoas ainda não marcaram que a fita está pronta. '],
-    'start.allReady': 'Todo mundo pronto. ',
-    'start.tracks': ['{n} faixa nesta partida.', '{n} faixas nesta partida.'],
+    'start.needSongs': 'Pelo menos duas pessoas precisam conectar o Spotify.',
+    'start.needThree': 'As fitas precisam ter pelo menos 3 músicas no total.',
+    'start.notReady': ['{n} pessoa ainda não conectou o Spotify. ', '{n} pessoas ainda não conectaram o Spotify. '],
+    'start.allReady': 'Todo mundo conectado. ',
+    'start.goal': 'Ganha quem chegar primeiro a {n} pontos.',
     'rules.title': 'Pontos',
+    'rules.0': 'Ganha quem chegar primeiro na pontuação escolhida.',
     'rules.1': 'Pode marcar mais de uma pessoa: às vezes a mesma música está na fita de dois.',
     'rules.2': '<span class="pts">+100</span> por pessoa certa, <span class="pts">−50</span> por pessoa errada.',
     'rules.3': '<span class="pts">+50</span> se acertar exatamente quem tem a música.',
     'rules.4': 'Se a música é sua: <span class="pts">+40</span> por cada um que não desconfiou de você.',
-    'game.side': 'Lado {side} · Faixa {no}',
-    'game.of': '{n} de {total}',
-    'game.trackOf': 'FAIXA {n} DE {total}',
+    'game.track': 'Lado {side} · Faixa {no}',
+    'game.goal': 'Até {n} pontos',
+    'game.trackNo': 'FAIXA {n}',
     'game.mystery': 'Faixa misteriosa',
     'game.timer': 'Tempo restante',
     'game.deck': 'Música da vez',
@@ -871,11 +819,12 @@ const I18N = {
     'rev.nobody': 'não marcou ninguém',
     'rev.exact': 'na mosca',
     'rev.fooled': 'enganou {n}',
-    'rev.board': 'Placar',
+    'rev.board': 'Placar · até {n} pontos',
     'rev.next': 'Próxima faixa',
     'rev.final': 'Ver o placar final',
     'rev.wait': 'Esperando o host soltar a próxima faixa…',
-    'rev.waitLast': 'Última faixa. Esperando o host abrir o placar final…',
+    'rev.waitLast': 'Temos um vencedor. Esperando o host abrir o placar final…',
+    'rev.waitOut': 'Acabaram as músicas das fitas. Esperando o host abrir o placar final…',
     'end.title': 'Fim<span>da fita</span>',
     'end.board': 'Placar final',
     'aw.det': 'Detetive',
@@ -892,25 +841,6 @@ const I18N = {
     'ban.reconnect': 'Reconectar',
     'ban.leave': 'Sair',
     'ban.retry': 'Tentar de novo',
-    'spc.btn': 'Puxar minhas mais ouvidas do Spotify',
-    'spc.range': 'Período',
-    'spc.short': 'Últimas 4 semanas',
-    'spc.medium': 'Últimos 6 meses',
-    'spc.long': 'Últimos 12 meses',
-    'spc.count': 'Quantas',
-    'spc.note': 'Só funciona pra contas do Spotify na lista de convidados do jogo (até 5 pessoas). Os outros podem colar links aqui embaixo.',
-    'spc.orPaste': 'ou cole links',
-    'spc.waiting': 'Termine o login na aba do Spotify e depois volte pra cá.',
-    'spc.added': ['{n} música adicionada do seu Spotify', '{n} músicas adicionadas do seu Spotify'],
-    'spc.noneNew': 'Essas músicas já estavam na sua fita.',
-    'spc.err.denied': 'O login no Spotify foi cancelado.',
-    'spc.err.notListed': 'Essa conta do Spotify ainda não está na lista de convidados do jogo. Peça pro dono do jogo cadastrar seu e-mail do Spotify, ou cole links.',
-    'spc.err.expired': 'Esse login expirou. Volte pro jogo e tente de novo.',
-    'spc.err.empty': 'O Spotify ainda não tem mais ouvidas nesse período. Tente um período maior.',
-    'spc.err.failed': 'Não consegui pegar suas músicas do Spotify. Tente de novo ou cole links.',
-    'cb.loading': 'Pegando suas mais ouvidas…',
-    'cb.done': 'Pronto! Suas músicas estão na fita. Pode fechar esta aba e voltar pro jogo.',
-    'cb.close': 'Fechar esta aba',
   },
 };
 let LANG = ls.get('wt-lang', 'en') === 'pt' ? 'pt' : 'en';
@@ -926,7 +856,6 @@ function applyStatic() {
   $$('[data-i18n-ph]').forEach((el) => { el.placeholder = t(el.dataset.i18nPh); });
   $$('[data-i18n-aria]').forEach((el) => { el.setAttribute('aria-label', t(el.dataset.i18nAria)); });
   $$('.langsw button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.lang === LANG ? 'true' : 'false'));
-  if (!clearArmed) $('#clear-songs').textContent = t('tape.clear');
 }
 
 /* ============ identity & client state ============ */
@@ -952,20 +881,18 @@ const S = {
   code: null,
   name: ls.get('wt-name', ''),
   pub: null,           // last state from the host
-  songs: sanitizeSongs(ls.get('wt-songs', [])).map((s) => ({ ...s, done: true })),
-  ready: false,
+  songs: sanitizeSongs(ls.get('wt-tape', [])),
   picks: new Set(),
   locked: false,
   playHere: ls.get('wt-play', true),
   deadline: 0,         // performance.now() based
 };
-let clearArmed = 0;
 
 /* ============ screens, messages, toast, banner ============ */
 function show(name) { $$('[data-screen]').forEach((el) => { el.hidden = el.dataset.screen !== name; }); }
 
 // Messages keep their key so a language switch can repaint them.
-const MSG = { home: null, paste: null, spc: null };
+const MSG = { home: null, spc: null };
 function setMsg(where, key, vars, isErr) { MSG[where] = key ? { key, vars, isErr } : null; paintMsg(where); }
 function paintMsg(where) {
   const el = $('#' + where + '-msg'); const m = MSG[where];
@@ -985,94 +912,41 @@ function paintBanner() {
 }
 function hideBanner() { BANNER = null; paintBanner(); }
 
-/* ============ songs: parsing + metadata ============ */
-function parseInput(text) {
-  const ids = [];
-  const re = /(?:open\.spotify\.com\/(?:intl-[a-z]{2}(?:-[a-z]{2})?\/)?(?:embed\/)?track\/|spotify:track:)([A-Za-z0-9]{22})/gi;
-  let m; while ((m = re.exec(text))) ids.push(m[1]);
-  return {
-    ids,
-    other: /open\.spotify\.com\/(?:intl-[a-z-]+\/)?(playlist|album|artist|episode|show)\//i.test(text),
-    short: /(spotify\.link|spoti\.fi)\//i.test(text),
-  };
-}
+// Cover art that fails to load turns into the plain placeholder instead of a broken-image icon.
+document.addEventListener('error', (e) => {
+  const img = e.target;
+  if (!(img instanceof HTMLImageElement)) return;
+  if (img.id === 'track-thumb') { img.hidden = true; $('#track-ph').hidden = false; return; }
+  const ph = document.createElement('span'); ph.className = 'ph'; img.replaceWith(ph);
+}, true);
 
-const metaCache = new Map();
-const metaQueue = [];
-let metaActive = 0;
-function needMeta(id) {
-  if (metaCache.has(id)) { applyMeta(id); return; }
-  if (metaQueue.includes(id)) return;
-  metaQueue.push(id); pumpMeta();
+/* ============ your tape (songs come from Spotify) ============ */
+function saveSongs() { ls.set('wt-tape', S.songs); }
+function sendableSongs() { return S.songs.map(({ id, title, thumb }) => ({ id, title, thumb })); }
+function setTape(list) {
+  S.songs = sanitizeSongs(list);
+  saveSongs(); renderMySongs(); sendHost({ t: 'songs', songs: sendableSongs() });
 }
-function pumpMeta() {
-  while (metaActive < 4 && metaQueue.length) {
-    const id = metaQueue.shift(); metaActive++;
-    fetch('https://open.spotify.com/oembed?url=' + encodeURIComponent('https://open.spotify.com/track/' + id))
-      .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
-      .then((j) => metaCache.set(id, { title: String(j.title || '').slice(0, 140), thumb: safeThumb(j.thumbnail_url), bad: false }))
-      .catch((status) => metaCache.set(id, { title: '', thumb: '', bad: status === 404 || status === 400 }))
-      .finally(() => { metaActive--; applyMeta(id); pumpMeta(); });
-  }
-}
-function applyMeta(id) {
-  const m = metaCache.get(id); if (!m) return;
-  let changed = false;
-  for (const s of S.songs) {
-    if (s.id !== id || s.done) continue;
-    s.title = m.title; s.thumb = m.thumb; s.bad = m.bad; s.done = true; changed = true;
-  }
-  if (changed) { saveSongs(); renderMySongs(); sendSongsSoon(); }
-}
-function saveSongs() { ls.set('wt-songs', S.songs.filter((s) => !s.bad).map(({ id, title, thumb }) => ({ id, title, thumb }))); }
-function sendableSongs() { return S.songs.filter((s) => !s.bad).map(({ id, title, thumb }) => ({ id, title, thumb })); }
-
-function addFromText(text) {
-  const { ids, other, short } = parseInput(text);
-  if (!ids.length) { setMsg('paste', short ? 'paste.short' : other ? 'paste.other' : 'paste.none', null, true); return; }
-  const have = new Set(S.songs.map((s) => s.id));
-  let added = 0, dup = 0, cut = 0;
-  for (const id of ids) {
-    if (have.has(id)) { dup++; continue; }
-    if (S.songs.length >= MAX_SONGS) { cut++; continue; }
-    have.add(id); S.songs.push({ id, title: '', thumb: '', done: false }); added++;
-    needMeta(id);
-  }
-  setMsg('paste', () => {
-    const parts = [];
-    if (added) parts.push(t('paste.added', { n: added }));
-    if (dup) parts.push(t('paste.dup', { n: dup }));
-    if (cut) parts.push(t('paste.cut', { n: cut, max: MAX_SONGS }));
-    if (other) parts.push(t('paste.otherSkipped'));
-    return parts.join(' · ') + '.';
-  });
-  $('#paste').value = '';
-  saveSongs(); renderMySongs(); sendSongsSoon();
-}
-
-let songsT = 0;
-function sendSongsSoon() { clearTimeout(songsT); songsT = setTimeout(() => sendHost({ t: 'songs', songs: sendableSongs() }), 400); }
-
 function renderMySongs() {
+  const n = S.songs.length;
+  $('#my-count').textContent = n ? t('songs', { n }) : '';
+  $('#tape-off').hidden = n > 0;
+  $('#tape-on').hidden = n === 0;
+  $('#tape-on-text').textContent = t('tape.on', { n });
   $('#song-list').replaceChildren(...S.songs.map((s, i) => {
-    const li = document.createElement('li');
-    li.className = 'song' + (s.bad ? ' bad' : '') + (!s.done && !s.title ? ' loading' : '');
-    const label = s.bad ? t('song.notFound') : (s.title || (s.done ? t('song.fallback', { id: s.id.slice(0, 6) }) : t('song.loading')));
-    li.innerHTML = `<span class="num">${pad2(i + 1)}</span>${s.thumb ? `<img src="${esc(s.thumb)}" alt="" loading="lazy">` : '<span class="ph"></span>'}<span class="stitle"></span><button class="x" type="button" data-id="${esc(s.id)}">×</button>`;
-    li.querySelector('.stitle').textContent = label;
-    li.querySelector('.x').setAttribute('aria-label', t('song.remove', { title: label }));
+    const li = document.createElement('li'); li.className = 'song';
+    li.innerHTML = `<span class="num">${pad2(i + 1)}</span>${s.thumb ? `<img src="${esc(s.thumb)}" alt="" loading="lazy">` : '<span class="ph"></span>'}<span class="stitle"></span>`;
+    li.querySelector('.stitle').textContent = s.title || '—';
     return li;
   }));
-  const n = S.songs.filter((s) => !s.bad).length;
-  $('#my-count').textContent = t('songs', { n });
-  $('#song-empty').hidden = S.songs.length > 0;
 }
 
-/* ============ optional Spotify sign-in: pull the player's top songs ============ */
-// Sign-in runs in a pop-up so the room connection on this page survives. The pop-up comes back
-// to this same page (callback mode), trades the code for a token (PKCE, no secret), reads
-// /me/top/tracks once and hands the songs back over a BroadcastChannel. No token is stored.
-const SPOT = { pending: null, bc: null };
+/* ============ Spotify sign-in: pull the player's top songs ============ */
+// The buttons are real links (target=_blank) holding a sign-in URL prepared in advance, so pop-up
+// blockers leave them alone and this page never leaves the room. Spotify sends the new tab back
+// to this page (callback mode), which trades the code for a token (PKCE, no secret), reads
+// /me/top/tracks and hands the songs back over a BroadcastChannel. No token is kept.
+const SPOT = { pending: null, prepared: null, bc: null };
 const spotifyOn = () => !!SPOTIFY_CLIENT_ID && !!(window.crypto && crypto.subtle);
 function spRedirectUri() { return location.origin + location.pathname.replace(/index\.html$/, ''); }
 function b64url(bytes) { let s = ''; bytes.forEach((b) => { s += String.fromCharCode(b); }); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
@@ -1082,9 +956,6 @@ async function makePkce() {
   return { verifier, challenge: b64url(digest) };
 }
 function spChannel() { if (!SPOT.bc && 'BroadcastChannel' in window) SPOT.bc = new BroadcastChannel('wt-spotify'); return SPOT.bc; }
-
-// The button is a real link (target=_blank) with the sign-in URL prepared in advance:
-// pop-up blockers leave plain links alone, and this page never navigates away from the room.
 async function prepareSpotifyLink() {
   const { verifier, challenge } = await makePkce();
   const state = b64url(crypto.getRandomValues(new Uint8Array(16)));
@@ -1093,51 +964,32 @@ async function prepareSpotifyLink() {
     scope: 'user-top-read', state, code_challenge_method: 'S256', code_challenge: challenge,
   });
   SPOT.prepared = { state, verifier };
-  $('#sp-connect').href = 'https://accounts.spotify.com/authorize?' + q.toString();
+  const href = 'https://accounts.spotify.com/authorize?' + q.toString();
+  $$('.sp-link').forEach((a) => { a.href = href; });
 }
 function onSpotifyClick(e) {
   const prep = SPOT.prepared;
   if (!prep) { e.preventDefault(); return; }
-  const range = SP_RANGES.includes($('#sp-range').value) ? $('#sp-range').value : 'medium_term';
-  const count = SP_COUNTS.includes(Number($('#sp-count').value)) ? Number($('#sp-count').value) : 15;
-  ls.set('wt-sp-auth', { state: prep.state, verifier: prep.verifier, range, count, redirect: spRedirectUri(), lang: LANG, ts: Date.now() });
+  ls.set('wt-sp-auth', { state: prep.state, verifier: prep.verifier, redirect: spRedirectUri(), lang: LANG, ts: Date.now() });
   SPOT.pending = prep.state; SPOT.prepared = null;
   setMsg('spc', 'spc.waiting');
-  setTimeout(() => { prepareSpotifyLink().catch(() => { /* button stays inert */ }); }, 500);
+  setTimeout(() => { prepareSpotifyLink().catch(() => { /* links stay inert */ }); }, 500);
 }
 function onSpotifyResult(msg) {
   if (!msg || msg.type !== 'wt-spotify' || !SPOT.pending || msg.state !== SPOT.pending) return;
   SPOT.pending = null;
   try { localStorage.removeItem('wt-sp-result'); } catch (e) { /* ignore */ }
   if (msg.error) { setMsg('spc', 'spc.err.' + (['denied', 'notListed', 'expired', 'empty'].includes(msg.error) ? msg.error : 'failed'), null, true); return; }
-  addTracks(msg.tracks);
-}
-function addTracks(list) {
-  const clean = sanitizeSongs(list);
-  const have = new Set(S.songs.map((s) => s.id));
-  let added = 0, dup = 0, cut = 0;
-  for (const s of clean) {
-    if (have.has(s.id)) { dup++; continue; }
-    if (S.songs.length >= MAX_SONGS) { cut++; continue; }
-    have.add(s.id); S.songs.push({ ...s, done: true }); added++;
-    metaCache.set(s.id, { title: s.title, thumb: s.thumb, bad: false });
-  }
-  setMsg('spc', () => {
-    if (!added) return t('spc.noneNew');
-    const parts = [t('spc.added', { n: added })];
-    if (dup) parts.push(t('paste.dup', { n: dup }));
-    if (cut) parts.push(t('paste.cut', { n: cut, max: MAX_SONGS }));
-    return parts.join(' · ') + '.';
-  });
-  saveSongs(); renderMySongs(); sendSongsSoon();
+  setTape(msg.tracks);
+  setMsg('spc', 'spc.loaded', { n: S.songs.length });
 }
 function pickThumb(images) {
   if (!Array.isArray(images) || !images.length) return '';
   const sorted = images.filter((i) => i && i.url).sort((a, b) => (a.width || 0) - (b.width || 0));
-  const img = sorted.find((i) => (i.width || 0) >= 64) || sorted[sorted.length - 1];
+  const img = sorted.find((i) => (i.width || 0) >= 128) || sorted[sorted.length - 1];
   return img ? safeThumb(img.url) : '';
 }
-// Callback mode: this page was opened by Spotify's redirect inside the pop-up.
+// Callback mode: this page was opened by Spotify's redirect in the sign-in tab.
 async function runSpotifyCallback(params) {
   const auth = ls.get('wt-sp-auth', null);
   if (auth && auth.lang) LANG = auth.lang === 'pt' ? 'pt' : 'en';
@@ -1162,18 +1014,24 @@ async function runSpotifyCallback(params) {
     });
     if (!tok.ok) { fail(tok.status === 403 ? 'notListed' : 'failed'); return; }
     const token = (await tok.json()).access_token;
-    const range = SP_RANGES.includes(auth.range) ? auth.range : 'medium_term';
-    const count = SP_COUNTS.includes(auth.count) ? auth.count : 15;
-    const res = await fetch(`https://api.spotify.com/v1/me/top/tracks?time_range=${range}&limit=${count}`, { headers: { Authorization: 'Bearer ' + token } });
-    if (res.status === 403) { fail('notListed'); return; }
-    if (!res.ok) { fail('failed'); return; }
-    const data = await res.json();
-    const tracks = (data.items || []).filter((tr) => tr && TRACK_ID.test(tr.id)).map((tr) => ({ id: tr.id, title: String(tr.name || ''), thumb: pickThumb(tr.album && tr.album.images) }));
+    const top = async (range) => {
+      const res = await fetch(`https://api.spotify.com/v1/me/top/tracks?time_range=${range}&limit=${SP_LIMIT}`, { headers: { Authorization: 'Bearer ' + token } });
+      if (res.status === 403) throw new Error('notListed');
+      if (!res.ok) throw new Error('failed');
+      return (await res.json()).items || [];
+    };
+    // Last ~6 months by default; thin histories get topped up from the other periods.
+    let items = await top('medium_term');
+    if (items.length < 10) items = items.concat(await top('short_term'), await top('long_term'));
+    const seen = new Set();
+    const tracks = items.filter((tr) => tr && TRACK_ID.test(tr.id) && !seen.has(tr.id) && seen.add(tr.id))
+      .slice(0, SP_LIMIT)
+      .map((tr) => ({ id: tr.id, title: String(tr.name || ''), thumb: pickThumb(tr.album && tr.album.images) }));
     if (!tracks.length) { fail('empty'); return; }
     status('cb.done');
     send({ type: 'wt-spotify', state: auth.state, tracks });
     setTimeout(() => { try { window.close(); } catch (e) { /* user closes it */ } }, 1200);
-  } catch (e) { fail('failed'); }
+  } catch (e) { fail(e && e.message === 'notListed' ? 'notListed' : 'failed'); }
 }
 
 /* ============ networking ============ */
@@ -1244,7 +1102,7 @@ function connectToHost() {
   const timer = setTimeout(() => { if (hostConn === conn && !conn.open) failJoin(() => t('err.noAnswer')); }, 15000);
   conn.on('open', () => {
     clearTimeout(timer); hideBanner(); setHomeBusy(false); setMsg('home', null);
-    conn.send({ t: 'hello', pid: myPid, name: S.name, songs: sendableSongs(), ready: S.ready });
+    conn.send({ t: 'hello', pid: myPid, name: S.name, songs: sendableSongs() });
     setUrl(S.code);
   });
   conn.on('data', (msg) => {
@@ -1284,14 +1142,14 @@ function makeHost() {
   return {
     code: null, hostPid: null,
     players: new Map(), order: [],
-    settings: { rounds: 12, seconds: 30 },
+    settings: { target: 1000, seconds: 30 },
     phase: 'lobby', rounds: [], idx: -1, votes: new Map(), deadline: 0, timer: 0,
     reveal: null, end: null, pairs: null,
 
     init(code, name) {
       this.code = code; this.hostPid = myPid;
       const me = this.addPlayer(myPid, name, null);
-      me.songs = sanitizeSongs(sendableSongs()); me.ready = S.ready;
+      me.songs = sanitizeSongs(sendableSongs());
       this.broadcast();
     },
     stop() { clearTimeout(this.timer); for (const p of this.players.values()) { try { p.conn && p.conn.close(); } catch (e) { /* ignore */ } } },
@@ -1317,13 +1175,13 @@ function makeHost() {
         p.name = cleanName(msg.name) || p.name;
       }
       conn._pid = pid;
-      if (this.phase === 'lobby') { p.songs = sanitizeSongs(msg.songs); p.ready = !!msg.ready; }
+      if (this.phase === 'lobby') p.songs = sanitizeSongs(msg.songs);
       this.broadcast();
     },
     addPlayer(pid, name, conn) {
       const used = new Set([...this.players.values()].map((p) => p.color));
       const color = COLORS.find((c) => !used.has(c)) || COLORS[this.players.size % COLORS.length];
-      const p = { id: pid, name: cleanName(name) || '???', color, songs: [], ready: false, connected: true, conn, score: 0, stats: { hits: 0, misses: 0, fooled: 0 } };
+      const p = { id: pid, name: cleanName(name) || '???', color, songs: [], connected: true, conn, score: 0, stats: { hits: 0, misses: 0, fooled: 0 } };
       this.players.set(pid, p); this.order.push(pid);
       return p;
     },
@@ -1341,7 +1199,6 @@ function makeHost() {
       const isHost = pid === this.hostPid;
       switch (msg.t) {
         case 'songs': if (this.phase === 'lobby') { p.songs = sanitizeSongs(msg.songs); this.broadcast(); } break;
-        case 'ready': if (this.phase === 'lobby') { p.ready = !!msg.v; this.broadcast(); } break;
         case 'vote':
           if (this.phase === 'round' && msg.n === this.idx + 1 && !this.votes.has(pid)) {
             const picks = Array.isArray(msg.picks) ? [...new Set(msg.picks.filter((x) => typeof x === 'string' && x !== pid && this.players.has(x)))] : [];
@@ -1350,7 +1207,7 @@ function makeHost() {
           break;
         case 'settings':
           if (isHost && this.phase === 'lobby') {
-            if (ROUND_OPTS.includes(msg.rounds)) this.settings.rounds = msg.rounds;
+            if (TARGET_OPTS.includes(msg.target)) this.settings.target = msg.target;
             if (SECS_OPTS.includes(msg.seconds)) this.settings.seconds = msg.seconds;
             this.broadcast();
           }
@@ -1367,8 +1224,7 @@ function makeHost() {
       if (ps.filter((p) => p.songs.length > 0).length < 2) return { ok: false, why: 'start.needSongs' };
       const uniq = new Set(); ps.forEach((p) => p.songs.forEach((s) => uniq.add(s.id)));
       if (uniq.size < 3) return { ok: false, why: 'start.needThree' };
-      const total = this.settings.rounds === 0 ? uniq.size : Math.min(this.settings.rounds, uniq.size);
-      return { ok: true, notReady: ps.filter((p) => !p.ready).length, total };
+      return { ok: true, notReady: ps.filter((p) => !p.songs.length).length };
     },
     start() {
       if (this.phase !== 'lobby' || !this.canStart().ok) return;
@@ -1380,26 +1236,27 @@ function makeHost() {
         e.owners.add(p.id);
         if (!e.title && s.title) { e.title = s.title; e.thumb = s.thumb; }
       }
-      const want = this.settings.rounds === 0 ? pool.size : Math.min(this.settings.rounds, pool.size);
-      // Round-robin over players so everyone's songs show up about equally; shared songs go first.
+      // Every song goes on the playlist, dealt round-robin so everyone's tape comes up about
+      // equally often; each "lap" is shuffled so the order of owners isn't predictable.
       const queues = new Map();
       for (const p of live) {
         const mine = shuffle([...pool.values()].filter((e) => e.owners.has(p.id)));
         mine.sort((a, b) => (b.owners.size > 1) - (a.owners.size > 1));
         if (mine.length) queues.set(p.id, mine);
       }
-      const used = new Set(); const chosen = [];
-      let turn = shuffle([...queues.keys()]);
-      while (chosen.length < want && turn.length) {
-        for (const id of turn) {
-          if (chosen.length >= want) break;
+      const used = new Set(); const order = [];
+      let turn = [...queues.keys()];
+      while (turn.length) {
+        const lap = [];
+        for (const id of shuffle(turn)) {
           const q = queues.get(id);
           while (q.length && used.has(q[0].trackId)) q.shift();
-          if (q.length) { const e = q.shift(); used.add(e.trackId); chosen.push(e); }
+          if (q.length) { const e = q.shift(); used.add(e.trackId); lap.push(e); }
         }
+        order.push(...shuffle(lap));
         turn = turn.filter((id) => queues.get(id).some((e) => !used.has(e.trackId)));
       }
-      this.rounds = shuffle(chosen).map((e) => ({ trackId: e.trackId, title: e.title, thumb: e.thumb, owners: [...e.owners] }));
+      this.rounds = order.map((e) => ({ trackId: e.trackId, title: e.title, thumb: e.thumb, owners: [...e.owners] }));
       this.pairs = this.computePairs(live);
       for (const p of this.players.values()) { p.score = 0; p.stats = { hits: 0, misses: 0, fooled: 0 }; }
       this.end = null;
@@ -1457,8 +1314,11 @@ function makeHost() {
       this.phase = 'reveal';
       this.broadcast();
     },
+    isOver() {
+      return [...this.players.values()].some((p) => p.score >= this.settings.target) || this.idx + 1 >= this.rounds.length;
+    },
     next() {
-      if (this.idx + 1 < this.rounds.length) { this.startRound(this.idx + 1); return; }
+      if (!this.isOver()) { this.startRound(this.idx + 1); return; }
       clearTimeout(this.timer);
       const ps = [...this.players.values()];
       const best = (key) => {
@@ -1473,22 +1333,24 @@ function makeHost() {
       clearTimeout(this.timer);
       for (const [id, p] of [...this.players]) { if (!p.connected) this.players.delete(id); }
       this.order = this.order.filter((id) => this.players.has(id));
-      for (const p of this.players.values()) { p.score = 0; p.ready = false; }
+      for (const p of this.players.values()) p.score = 0;
       this.phase = 'lobby'; this.rounds = []; this.idx = -1; this.reveal = null; this.end = null; this.votes = new Map();
       this.broadcast();
     },
     stateFor(pid) {
       const players = this.order.map((id) => this.players.get(id)).filter(Boolean).map((p) => ({
-        id: p.id, name: p.name, color: p.color, songs: p.songs.length, ready: p.ready, connected: p.connected, score: p.score, host: p.id === this.hostPid,
+        id: p.id, name: p.name, color: p.color, songs: p.songs.length, connected: p.connected, score: p.score, host: p.id === this.hostPid,
       }));
       const st = { t: 'state', code: this.code, phase: this.phase, settings: { ...this.settings }, players };
       if (this.phase === 'lobby') st.canStart = this.canStart();
       if (this.phase === 'round' || this.phase === 'reveal') {
         const r = this.rounds[this.idx];
         st.round = {
-          n: this.idx + 1, total: this.rounds.length, trackId: r.trackId, title: r.title, thumb: r.thumb,
+          n: this.idx + 1, trackId: r.trackId, title: r.title, thumb: r.thumb,
           remaining: this.phase === 'round' && this.deadline ? Math.max(0, this.deadline - Date.now()) : null,
           voted: [...this.votes.keys()], mine: r.owners.includes(pid), myVote: this.votes.get(pid) || null,
+          last: this.phase === 'reveal' && this.isOver(),
+          win: [...this.players.values()].some((p) => p.score >= this.settings.target),
         };
       }
       if (this.phase === 'reveal') st.reveal = this.reveal;
@@ -1524,40 +1386,43 @@ function render(prev) {
 }
 function setLang(lang) {
   LANG = lang === 'pt' ? 'pt' : 'en'; ls.set('wt-lang', LANG);
-  applyStatic(); paintMsg('home'); paintMsg('paste'); paintMsg('spc'); paintBanner(); renderMySongs();
+  applyStatic(); paintMsg('home'); paintMsg('spc'); paintBanner(); renderMySongs(); renderSpotifySetup();
   if (S.pub) render(S.pub); // prev === current: repaint only, no round reset
-  if (!SP.ctrl) $('#sp-status').textContent = t(SP.api ? 'sp.hint' : 'sp.loading');
-  else $('#sp-status').textContent = t('sp.hint');
+  $('#sp-status').textContent = t(SP.api || SP.ctrl ? 'sp.hint' : 'sp.loading');
+}
+function renderSpotifySetup() {
+  const on = spotifyOn();
+  $('#sp-connect').hidden = !on;
+  $('#sp-notsetup').hidden = on;
 }
 
 function renderLobby(prev) {
   const st = S.pub; const isHost = S.role === 'host';
-  if (!prev || prev.phase !== 'lobby') { renderMySongs(); S.ready = !!(st.players.find((p) => p.id === myPid) || {}).ready; }
+  if (!prev || prev.phase !== 'lobby') renderMySongs();
   $('#room-code').textContent = st.code;
   $('#pcount').textContent = st.players.length + '/' + MAX_PLAYERS;
   $('#player-list').replaceChildren(...st.players.map((p) => {
     const li = document.createElement('li');
+    const ready = p.songs > 0;
     li.className = 'prow' + (p.connected ? '' : ' off'); li.style.setProperty('--c', p.color);
-    li.innerHTML = `<span class="dot"></span><span class="pname"></span><span class="pmeta"></span><span class="pready${p.ready ? ' yes' : ''}"></span>`;
+    li.innerHTML = `<span class="dot"></span><span class="pname"></span><span class="pmeta"></span><span class="pready${ready ? ' yes' : ''}"></span>`;
     const nm = li.querySelector('.pname'); nm.textContent = p.name;
     if (p.id === myPid) { const em = document.createElement('em'); em.textContent = ' ' + t('room.you'); nm.append(em); }
     if (p.host) { const tag = document.createElement('span'); tag.className = 'tag'; tag.textContent = t('room.host'); nm.append(' ', tag); }
-    li.querySelector('.pmeta').textContent = t('songs', { n: p.songs });
-    li.querySelector('.pready').textContent = t(p.ready ? 'room.ready' : 'room.picking');
+    li.querySelector('.pmeta').textContent = ready ? t('songs', { n: p.songs }) : '';
+    li.querySelector('.pready').textContent = t(ready ? 'room.ready' : 'room.waiting');
     return li;
   }));
-  const me = st.players.find((p) => p.id === myPid);
-  $('#ready-box').checked = !!(me && me.ready);
-  $('#set-rounds').value = String(st.settings.rounds);
+  $('#set-target').value = String(st.settings.target);
   $('#set-secs').value = String(st.settings.seconds);
-  $('#set-rounds').disabled = !isHost; $('#set-secs').disabled = !isHost;
+  $('#set-target').disabled = !isHost; $('#set-secs').disabled = !isHost;
   $('#start-btn').hidden = !isHost;
   const cs = st.canStart || { ok: false, why: 'start.needPlayer' };
   $('#start-btn').disabled = !cs.ok;
   let why = '';
   if (!isHost) why = t('match.guest');
   else if (!cs.ok) why = t(cs.why);
-  else why = (cs.notReady ? t('start.notReady', { n: cs.notReady }) : t('start.allReady')) + t('start.tracks', { n: cs.total });
+  else why = (cs.notReady ? t('start.notReady', { n: cs.notReady }) : t('start.allReady')) + t('start.goal', { n: st.settings.target });
   $('#start-why').textContent = why;
 }
 
@@ -1573,11 +1438,12 @@ function renderGame(prev) {
   }
   if (r.myVote && !S.locked) { S.locked = true; S.picks = new Set(r.myVote); }
 
-  const half = Math.ceil(r.total / 2); const sideB = r.n > half; const no = sideB ? r.n - half : r.n;
-  $('#side-text').textContent = t('game.side', { side: sideB ? 'B' : 'A', no: pad2(no) });
-  $('#round-of').textContent = t('game.of', { n: r.n, total: r.total });
-  $('#cass-side').textContent = sideB ? 'B' : 'A';
-  $('#cass-of').textContent = t('game.trackOf', { n: r.n, total: r.total });
+  // A cassette side holds 10 tracks, then the tape flips.
+  const side = Math.floor((r.n - 1) / 10) % 2 ? 'B' : 'A';
+  $('#side-text').textContent = t('game.track', { side, no: pad2(((r.n - 1) % 10) + 1) });
+  $('#round-of').textContent = t('game.goal', { n: st.settings.target });
+  $('#cass-side').textContent = side;
+  $('#cass-of').textContent = t('game.trackNo', { n: r.n });
   $('#track-title').textContent = r.title || t('game.mystery');
   const img = $('#track-thumb');
   if (r.thumb) { if (img.getAttribute('src') !== r.thumb) img.src = r.thumb; img.hidden = false; $('#track-ph').hidden = true; }
@@ -1656,18 +1522,21 @@ function renderReveal() {
     if (row.fooled) add('', t('rev.fooled', { n: row.fooled }));
     return li;
   }));
+  $('#board-h').textContent = t('rev.board', { n: st.settings.target });
   renderBoard($('#board'));
-  const last = r.n === r.total;
   $('#next-btn').hidden = !isHost;
-  $('#next-btn').textContent = t(last ? 'rev.final' : 'rev.next');
-  $('#next-wait').textContent = isHost ? '' : t(last ? 'rev.waitLast' : 'rev.wait');
+  $('#next-btn').textContent = t(r.last ? 'rev.final' : 'rev.next');
+  $('#next-wait').textContent = isHost ? '' : t(r.last ? (r.win ? 'rev.waitLast' : 'rev.waitOut') : 'rev.wait');
 }
 
 function renderBoard(ol) {
+  const target = S.pub.settings.target;
   const ps = [...S.pub.players].sort((a, b) => b.score - a.score);
   ol.replaceChildren(...ps.map((p, i) => {
     const li = document.createElement('li'); if (p.id === myPid) li.className = 'me';
-    li.innerHTML = `<span class="rk">${i + 1}</span><span class="dot" style="--c:${esc(p.color)}"></span><span class="nm"></span><span class="sc">${p.score}</span>`;
+    li.style.setProperty('--c', p.color);
+    li.style.setProperty('--fill', Math.min(100, Math.round((p.score / target) * 100)) + '%');
+    li.innerHTML = `<span class="rk">${i + 1}</span><span class="dot"></span><span class="nm"></span><span class="sc">${p.score}</span>`;
     li.querySelector('.nm').textContent = p.name;
     return li;
   }));
@@ -1759,26 +1628,18 @@ $('#name-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') { c
 $('#code-input').addEventListener('input', (e) => { e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 5); });
 document.addEventListener('click', (e) => { const b = e.target.closest('.langsw button'); if (b) setLang(b.dataset.lang); });
 
-$('#add-btn').addEventListener('click', () => addFromText($('#paste').value));
-$('#paste').addEventListener('paste', () => setTimeout(() => addFromText($('#paste').value), 0));
-$('#song-list').addEventListener('click', (e) => {
-  const b = e.target.closest('.x'); if (!b) return;
-  S.songs = S.songs.filter((s) => s.id !== b.dataset.id);
-  saveSongs(); renderMySongs(); sendSongsSoon();
+$$('.sp-link').forEach((a) => {
+  a.addEventListener('click', onSpotifyClick);
+  a.addEventListener('auxclick', (e) => { if (e.button === 1) onSpotifyClick(e); });
 });
-$('#clear-songs').addEventListener('click', (e) => {
-  if (!S.songs.length) return;
-  if (!clearArmed) {
-    e.target.textContent = t('tape.clearConfirm');
-    clearArmed = setTimeout(() => { clearArmed = 0; e.target.textContent = t('tape.clear'); }, 3000);
-    return;
-  }
-  clearTimeout(clearArmed); clearArmed = 0; e.target.textContent = t('tape.clear');
-  S.songs = []; saveSongs(); renderMySongs(); sendSongsSoon();
-});
-$('#ready-box').addEventListener('change', (e) => { S.ready = e.target.checked; sendHost({ t: 'ready', v: S.ready }); });
-const sendSettings = () => sendHost({ t: 'settings', rounds: Number($('#set-rounds').value), seconds: Number($('#set-secs').value) });
-$('#set-rounds').addEventListener('change', sendSettings);
+$('#sp-disconnect').addEventListener('click', () => { setTape([]); setMsg('spc', null); });
+$('#cb-close-btn').addEventListener('click', () => { try { window.close(); } catch (e) { /* ignore */ } });
+const bcIn = spChannel();
+if (bcIn) bcIn.addEventListener('message', (e) => onSpotifyResult(e.data));
+window.addEventListener('storage', (e) => { if (e.key === 'wt-sp-result' && e.newValue) { try { onSpotifyResult(JSON.parse(e.newValue)); } catch (err) { /* ignore */ } } });
+
+const sendSettings = () => sendHost({ t: 'settings', target: Number($('#set-target').value), seconds: Number($('#set-secs').value) });
+$('#set-target').addEventListener('change', sendSettings);
 $('#set-secs').addEventListener('change', sendSettings);
 $('#start-btn').addEventListener('click', () => sendHost({ t: 'start' }));
 $('#copy-link').addEventListener('click', async () => {
@@ -1815,24 +1676,17 @@ window.addEventListener('beforeunload', (e) => {
   if (S.role === 'host' && S.pub && S.pub.players.length > 1) { e.preventDefault(); e.returnValue = ''; }
 });
 
-$('#sp-connect').addEventListener('click', onSpotifyClick);
-$('#sp-connect').addEventListener('auxclick', (e) => { if (e.button === 1) onSpotifyClick(e); });
-$('#cb-close-btn').addEventListener('click', () => { try { window.close(); } catch (e) { /* ignore */ } });
-const bcIn = spChannel();
-if (bcIn) bcIn.addEventListener('message', (e) => onSpotifyResult(e.data));
-window.addEventListener('storage', (e) => { if (e.key === 'wt-sp-result' && e.newValue) { try { onSpotifyResult(JSON.parse(e.newValue)); } catch (err) { /* ignore */ } } });
-
-// Boot: translate, then either finish a Spotify sign-in (pop-up) or handle an invite link (?sala=CODE).
+// Boot: translate, then either finish a Spotify sign-in (sign-in tab) or handle an invite link (?sala=CODE).
 applyStatic();
 $('#sp-status').textContent = t('sp.hint');
-$('#sp-connect-box').hidden = !spotifyOn();
+renderSpotifySetup();
 renderMySongs();
 (() => {
   const qp = new URLSearchParams(location.search);
   if (spotifyOn() && qp.has('state') && (qp.has('code') || qp.has('error'))) { runSpotifyCallback(qp); return; }
-  if (spotifyOn()) prepareSpotifyLink().catch(() => { $('#sp-connect-box').hidden = true; });
+  if (spotifyOn()) prepareSpotifyLink().catch(() => { $('#sp-connect').hidden = true; $('#sp-notsetup').hidden = false; });
   let code = '';
-  try { code = (new URL(location.href).searchParams.get('sala') || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 5); } catch (e) { /* ignore */ }
+  try { code = (qp.get('sala') || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 5); } catch (e) { /* ignore */ }
   if (code) {
     $('#code-input').value = code;
     setMsg('home', 'home.invited', { code });
