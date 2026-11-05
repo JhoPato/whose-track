@@ -293,6 +293,11 @@ kbd{font:600 12px/1 var(--font-mono);background:var(--paper-shade);border:1px so
 .cb-text.err{color:var(--bad);font-weight:700}
 
 .connected{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px}
+.sources{border:0;margin:0 0 14px;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px}
+.sources legend{padding:0;margin-bottom:8px;font:700 12px/1.2 var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft)}
+.sources label{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:500;cursor:pointer}
+.sources input{width:18px;height:18px;margin:0;accent-color:var(--ink)}
+.sources input:disabled+span{opacity:.75}
 .mysongs summary{cursor:pointer;font-weight:700;font-size:14px;color:var(--ink-soft)}
 .mysongs .songs{margin-top:10px}
 .board li{background:linear-gradient(to right,color-mix(in srgb,var(--c) 26%,var(--field)) var(--fill,0%),var(--field) var(--fill,0%))}
@@ -400,6 +405,7 @@ kbd{font:600 12px/1 var(--font-mono);background:var(--paper-shade);border:1px so
       </div>
       <div id="tape-on" class="spc" hidden>
         <p class="connected"><span class="spdot" aria-hidden="true"></span><span id="tape-on-text"></span></p>
+        <p class="spc-note" id="tape-mix"></p>
         <details class="mysongs">
           <summary data-i18n="tape.see"></summary>
           <ol class="songs" id="song-list"></ol>
@@ -433,7 +439,26 @@ kbd{font:600 12px/1 var(--font-mono);background:var(--paper-shade);border:1px so
               <option value="20">20 s</option><option value="30">30 s</option><option value="45">45 s</option><option value="60">60 s</option><option value="0" data-i18n="match.noLimit"></option>
             </select>
           </div>
+          <div class="field">
+            <label for="set-explicit" data-i18n="match.explicit"></label>
+            <select id="set-explicit">
+              <option value="1" data-i18n="match.explicitYes"></option><option value="0" data-i18n="match.explicitNo"></option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="set-start" data-i18n="match.startAt"></label>
+            <select id="set-start">
+              <option value="middle" data-i18n="match.middle"></option><option value="beginning" data-i18n="match.beginning"></option>
+            </select>
+          </div>
         </div>
+        <fieldset class="sources" id="set-sources">
+          <legend data-i18n="match.sources"></legend>
+          <label><input type="checkbox" data-src="top"> <span data-i18n="src.top"></span></label>
+          <label><input type="checkbox" data-src="liked"> <span data-i18n="src.liked"></span></label>
+          <label><input type="checkbox" data-src="playlists"> <span data-i18n="src.playlists"></span></label>
+          <label><input type="checkbox" data-src="albums"> <span data-i18n="src.albums"></span></label>
+        </fieldset>
         <p id="start-why"></p>
         <button class="btn primary big" id="start-btn" data-i18n="match.start"></button>
       </section>
@@ -566,7 +591,7 @@ kbd{font:600 12px/1 var(--font-mono);background:var(--paper-shade);border:1px so
 /* ============ constants & helpers ============ */
 const PREFIX = 'whosetrack-v1-';
 const MAX_PLAYERS = 8;
-const MAX_SONGS = 50;
+const MAX_SONGS = 160;
 const PTS = { hit: 100, miss: -50, exact: 50, fooled: 40 };
 const COLORS = ['#ff6b5a', '#ffcf3f', '#36d39b', '#4cc3ff', '#b48cff', '#ff7fc8', '#a6e34b', '#ff9f43'];
 const CODE_CHARS = 'BCDFGHJKLMNPQRSTVWXZ23456789';
@@ -574,8 +599,11 @@ const TARGET_OPTS = [500, 1000, 1500, 2000];
 const SECS_OPTS = [20, 30, 45, 60, 0];
 const TRACK_ID = /^[A-Za-z0-9]{22}$/;
 // Public Client ID from developer.spotify.com (not a secret). Players load their tape by signing in.
-const SPOTIFY_CLIENT_ID = '';
-const SP_LIMIT = 25; // songs pulled per player: top tracks of the last ~6 months
+const SPOTIFY_CLIENT_ID = '05ea87cdec664296a07ded9d51f22913';
+// Each tape is a random mix from these parts of the player's library (max songs taken per part).
+const SOURCES = ['top', 'liked', 'playlists', 'albums'];
+const SRC_LIMIT = { top: 30, liked: 40, playlists: 40, albums: 30 };
+const START_OPTS = ['middle', 'beginning'];
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -598,7 +626,7 @@ const I18N = {
     'lang.group': 'Language',
     'home.tagline': 'A song plays. Everyone guesses whose headphones it came from.',
     'home.step1': '<b>Someone creates a room</b> and sends the link to the group.',
-    'home.step2': '<b>Everyone connects Spotify.</b> The game loads the songs each person plays most. Nobody sees anyone else’s list.',
+    'home.step2': '<b>Everyone connects Spotify.</b> The game grabs a random mix of each person’s music. Nobody sees anyone else’s list.',
     'home.step3': '<b>Every track, everyone guesses</b> whose song it is. First to the target score wins.',
     'home.entry': 'Join the game',
     'home.name': 'Your name',
@@ -627,7 +655,7 @@ const I18N = {
     'toast.copied': 'Link copied. Send it to the group!',
     'toast.copyThis': 'Copy this link: {link}',
     'tape.title': 'Your tape',
-    'tape.introOff': 'Connect Spotify and the game loads the songs you’ve played most in the last 6 months. Only you can see them.',
+    'tape.introOff': 'Connect Spotify and the game grabs a random mix of what you listen to: most played, liked songs, your playlists and saved albums. Only you can see it.',
     'tape.on': ['Spotify connected · {n} song on your tape', 'Spotify connected · {n} songs on your tape'],
     'tape.see': 'See my songs',
     'songs': ['{n} song', '{n} songs'],
@@ -643,7 +671,7 @@ const I18N = {
     'spc.err.expired': 'This sign-in expired. Go back to the game and try again.',
     'spc.err.empty': 'Spotify doesn’t have enough listening history for this account yet.',
     'spc.err.failed': 'Couldn’t get your songs from Spotify. Try again.',
-    'cb.loading': 'Getting your top songs…',
+    'cb.loading': 'Picking a random mix of your music…',
     'cb.done': 'Done! Your songs are on your tape. You can close this tab and go back to the game.',
     'cb.close': 'Close this tab',
     'room.title': 'In the room',
@@ -717,12 +745,25 @@ const I18N = {
     'ban.reconnect': 'Reconnect',
     'ban.leave': 'Leave',
     'ban.retry': 'Try again',
+    'src.top': 'Most played',
+    'src.liked': 'Liked songs',
+    'src.playlists': 'Playlists',
+    'src.albums': 'Saved albums',
+    'match.explicit': 'Explicit songs',
+    'match.explicitYes': 'Allowed',
+    'match.explicitNo': 'Skip them',
+    'match.startAt': 'Songs start at',
+    'match.middle': 'The middle',
+    'match.beginning': 'The beginning',
+    'match.sources': 'Use songs from',
+    'start.noSources': 'Pick at least one place to take songs from.',
+    'start.filtered': 'Not enough songs fit these settings. Turn on more sources or allow explicit songs.',
   },
   pt: {
     'lang.group': 'Idioma',
     'home.tagline': 'Toca uma música. A galera tenta adivinhar de quem é o fone.',
     'home.step1': '<b>Alguém cria a sala</b> e manda o link pro grupo.',
-    'home.step2': '<b>Todo mundo conecta o Spotify.</b> O jogo puxa as músicas que cada um mais ouve. Ninguém vê a lista dos outros.',
+    'home.step2': '<b>Todo mundo conecta o Spotify.</b> O jogo pega uma mistura aleatória das músicas de cada um. Ninguém vê a lista dos outros.',
     'home.step3': '<b>A cada faixa, todo mundo palpita</b> de quem é aquela música. Quem chegar primeiro na pontuação ganha.',
     'home.entry': 'Entrar no jogo',
     'home.name': 'Seu nome',
@@ -751,7 +792,7 @@ const I18N = {
     'toast.copied': 'Link copiado. Manda no grupo!',
     'toast.copyThis': 'Copie este link: {link}',
     'tape.title': 'Sua fita',
-    'tape.introOff': 'Conecte o Spotify e o jogo puxa as músicas que você mais ouviu nos últimos 6 meses. Só você vê essa lista.',
+    'tape.introOff': 'Conecte o Spotify e o jogo pega uma mistura aleatória do que você ouve: mais ouvidas, curtidas, suas playlists e álbuns salvos. Só você vê essa lista.',
     'tape.on': ['Spotify conectado · {n} música na sua fita', 'Spotify conectado · {n} músicas na sua fita'],
     'tape.see': 'Ver minhas músicas',
     'songs': ['{n} música', '{n} músicas'],
@@ -767,7 +808,7 @@ const I18N = {
     'spc.err.expired': 'Esse login expirou. Volte pro jogo e tente de novo.',
     'spc.err.empty': 'O Spotify ainda não tem histórico suficiente dessa conta.',
     'spc.err.failed': 'Não consegui pegar suas músicas do Spotify. Tente de novo.',
-    'cb.loading': 'Pegando suas mais ouvidas…',
+    'cb.loading': 'Escolhendo uma mistura aleatória das suas músicas…',
     'cb.done': 'Pronto! Suas músicas estão na fita. Pode fechar esta aba e voltar pro jogo.',
     'cb.close': 'Fechar esta aba',
     'room.title': 'Na sala',
@@ -841,6 +882,19 @@ const I18N = {
     'ban.reconnect': 'Reconectar',
     'ban.leave': 'Sair',
     'ban.retry': 'Tentar de novo',
+    'src.top': 'Mais ouvidas',
+    'src.liked': 'Curtidas',
+    'src.playlists': 'Playlists',
+    'src.albums': 'Álbuns salvos',
+    'match.explicit': 'Músicas explícitas',
+    'match.explicitYes': 'Pode tocar',
+    'match.explicitNo': 'Pular',
+    'match.startAt': 'A música começa',
+    'match.middle': 'No meio',
+    'match.beginning': 'No começo',
+    'match.sources': 'Usar músicas de',
+    'start.noSources': 'Escolha pelo menos uma fonte de músicas.',
+    'start.filtered': 'Poucas músicas se encaixam nessas opções. Ligue mais fontes ou permita as explícitas.',
   },
 };
 let LANG = ls.get('wt-lang', 'en') === 'pt' ? 'pt' : 'en';
@@ -870,7 +924,8 @@ function sanitizeSongs(arr) {
   for (const s of arr) {
     if (!s || !TRACK_ID.test(s.id) || seen.has(s.id)) continue;
     seen.add(s.id);
-    out.push({ id: s.id, title: String(s.title ?? '').slice(0, 140), thumb: safeThumb(s.thumb) });
+    const src = Array.isArray(s.src) ? [...new Set(s.src.filter((x) => SOURCES.includes(x)))] : [];
+    out.push({ id: s.id, title: String(s.title ?? '').slice(0, 140), thumb: safeThumb(s.thumb), explicit: !!s.explicit, src: src.length ? src : ['top'] });
     if (out.length >= MAX_SONGS) break;
   }
   return out;
@@ -922,7 +977,7 @@ document.addEventListener('error', (e) => {
 
 /* ============ your tape (songs come from Spotify) ============ */
 function saveSongs() { ls.set('wt-tape', S.songs); }
-function sendableSongs() { return S.songs.map(({ id, title, thumb }) => ({ id, title, thumb })); }
+function sendableSongs() { return S.songs.map(({ id, title, thumb, explicit, src }) => ({ id, title, thumb, explicit, src })); }
 function setTape(list) {
   S.songs = sanitizeSongs(list);
   saveSongs(); renderMySongs(); sendHost({ t: 'songs', songs: sendableSongs() });
@@ -933,6 +988,8 @@ function renderMySongs() {
   $('#tape-off').hidden = n > 0;
   $('#tape-on').hidden = n === 0;
   $('#tape-on-text').textContent = t('tape.on', { n });
+  const mix = SOURCES.map((k) => [k, S.songs.filter((s) => s.src.includes(k)).length]).filter(([, c]) => c);
+  $('#tape-mix').textContent = mix.map(([k, c]) => `${t('src.' + k)}: ${c}`).join(' · ');
   $('#song-list').replaceChildren(...S.songs.map((s, i) => {
     const li = document.createElement('li'); li.className = 'song';
     li.innerHTML = `<span class="num">${pad2(i + 1)}</span>${s.thumb ? `<img src="${esc(s.thumb)}" alt="" loading="lazy">` : '<span class="ph"></span>'}<span class="stitle"></span>`;
@@ -961,7 +1018,7 @@ async function prepareSpotifyLink() {
   const state = b64url(crypto.getRandomValues(new Uint8Array(16)));
   const q = new URLSearchParams({
     client_id: SPOTIFY_CLIENT_ID, response_type: 'code', redirect_uri: spRedirectUri(),
-    scope: 'user-top-read', state, code_challenge_method: 'S256', code_challenge: challenge,
+    scope: 'user-top-read user-library-read playlist-read-private playlist-read-collaborative', state, code_challenge_method: 'S256', code_challenge: challenge,
   });
   SPOT.prepared = { state, verifier };
   const href = 'https://accounts.spotify.com/authorize?' + q.toString();
@@ -989,6 +1046,87 @@ function pickThumb(images) {
   const img = sorted.find((i) => (i.width || 0) >= 128) || sorted[sorted.length - 1];
   return img ? safeThumb(img.url) : '';
 }
+// A random mix of what the player listens to, so the reveal can land on a forgotten favourite:
+// most played (all three periods), random pages of liked songs, random stretches of playlists
+// they made, and a few tracks from random saved albums. Each song remembers where it came from
+// so the host can switch sources on and off.
+const randInt = (n) => Math.floor(Math.random() * Math.max(1, n));
+const uniqTracks = (list) => { const seen = new Set(); return list.filter((tr) => tr && tr.id && !seen.has(tr.id) && seen.add(tr.id)); };
+async function pullLibrary(token) {
+  const headers = { Authorization: 'Bearer ' + token };
+  // strict: the first call decides whether this account may use the app at all.
+  const api = async (path, strict) => {
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const res = await fetch('https://api.spotify.com/v1' + path, { headers });
+      if (res.status === 429 && attempt === 0) { await new Promise((r) => setTimeout(r, Math.min(5, Number(res.headers.get('Retry-After')) || 2) * 1000)); continue; }
+      if (res.ok) return res.json();
+      if (strict) throw new Error(res.status === 403 ? 'notListed' : 'failed');
+      return null;
+    }
+    return null;
+  };
+  const songs = new Map();
+  const add = (tr, src, images) => {
+    if (!tr || tr.is_local || (tr.type && tr.type !== 'track') || !TRACK_ID.test(tr.id || '')) return;
+    let s = songs.get(tr.id);
+    if (!s) { s = { id: tr.id, title: String(tr.name || ''), thumb: pickThumb((tr.album && tr.album.images) || images), explicit: !!tr.explicit, src: [] }; songs.set(tr.id, s); }
+    if (!s.src.includes(src)) s.src.push(src);
+  };
+
+  // Most played: everything Spotify ranks across ~4 weeks, ~6 months and ~1 year.
+  let top = [];
+  for (const range of ['medium_term', 'short_term', 'long_term']) {
+    const j = await api(`/me/top/tracks?time_range=${range}&limit=50`, range === 'medium_term');
+    if (j && j.items) top = top.concat(j.items);
+  }
+  shuffle(uniqTracks(top)).slice(0, SRC_LIMIT.top).forEach((tr) => add(tr, 'top'));
+
+  // Liked songs: the newest page plus two random pages further back.
+  const liked = await api('/me/tracks?limit=50');
+  if (liked && liked.items && liked.items.length) {
+    let pool = liked.items;
+    const pages = Math.ceil((liked.total || 0) / 50);
+    for (const p of shuffle([...Array(pages).keys()].slice(1)).slice(0, 2)) {
+      const j = await api(`/me/tracks?limit=50&offset=${p * 50}`);
+      if (j && j.items) pool = pool.concat(j.items);
+    }
+    shuffle(uniqTracks(pool.map((x) => x && (x.track || x.item)))).slice(0, SRC_LIMIT.liked).forEach((tr) => add(tr, 'liked'));
+  }
+
+  // Playlists the player made (Spotify only returns the songs of playlists you own).
+  const me = await api('/me');
+  const lists = await api('/me/playlists?limit=50');
+  if (me && lists && lists.items) {
+    const mine = lists.items.filter((pl) => pl && pl.id && ((pl.owner && pl.owner.id === me.id) || pl.collaborative));
+    let pool = [];
+    for (const pl of shuffle(mine).slice(0, 6)) {
+      const total = ((pl.items && !Array.isArray(pl.items) ? pl.items : pl.tracks) || {}).total || 0;
+      if (!total) continue;
+      const j = await api(`/playlists/${pl.id}/items?limit=50&offset=${total > 50 ? randInt(total - 49) : 0}`);
+      if (j && j.items) pool = pool.concat(j.items.map((x) => x && (x.item || x.track)));
+    }
+    shuffle(uniqTracks(pool)).slice(0, SRC_LIMIT.playlists).forEach((tr) => add(tr, 'playlists'));
+  }
+
+  // Saved albums: a few tracks from random albums.
+  const albums = await api('/me/albums?limit=50');
+  if (albums && albums.items && albums.items.length) {
+    let list = albums.items;
+    if ((albums.total || 0) > 50) {
+      const j = await api(`/me/albums?limit=50&offset=${randInt(albums.total - 49)}`);
+      if (j && j.items) list = list.concat(j.items);
+    }
+    const pool = [];
+    for (const x of shuffle(list).slice(0, 12)) {
+      const album = x && x.album;
+      if (!album || !album.tracks || !Array.isArray(album.tracks.items)) continue;
+      for (const tr of shuffle(album.tracks.items).slice(0, 3)) pool.push({ tr, images: album.images });
+    }
+    shuffle(pool).slice(0, SRC_LIMIT.albums).forEach(({ tr, images }) => add(tr, 'albums', images));
+  }
+  return shuffle([...songs.values()]).slice(0, MAX_SONGS);
+}
+
 // Callback mode: this page was opened by Spotify's redirect in the sign-in tab.
 async function runSpotifyCallback(params) {
   const auth = ls.get('wt-sp-auth', null);
@@ -1014,19 +1152,7 @@ async function runSpotifyCallback(params) {
     });
     if (!tok.ok) { fail(tok.status === 403 ? 'notListed' : 'failed'); return; }
     const token = (await tok.json()).access_token;
-    const top = async (range) => {
-      const res = await fetch(`https://api.spotify.com/v1/me/top/tracks?time_range=${range}&limit=${SP_LIMIT}`, { headers: { Authorization: 'Bearer ' + token } });
-      if (res.status === 403) throw new Error('notListed');
-      if (!res.ok) throw new Error('failed');
-      return (await res.json()).items || [];
-    };
-    // Last ~6 months by default; thin histories get topped up from the other periods.
-    let items = await top('medium_term');
-    if (items.length < 10) items = items.concat(await top('short_term'), await top('long_term'));
-    const seen = new Set();
-    const tracks = items.filter((tr) => tr && TRACK_ID.test(tr.id) && !seen.has(tr.id) && seen.add(tr.id))
-      .slice(0, SP_LIMIT)
-      .map((tr) => ({ id: tr.id, title: String(tr.name || ''), thumb: pickThumb(tr.album && tr.album.images) }));
+    const tracks = await pullLibrary(token);
     if (!tracks.length) { fail('empty'); return; }
     status('cb.done');
     send({ type: 'wt-spotify', state: auth.state, tracks });
@@ -1142,7 +1268,7 @@ function makeHost() {
   return {
     code: null, hostPid: null,
     players: new Map(), order: [],
-    settings: { target: 1000, seconds: 30 },
+    settings: { target: 1000, seconds: 30, explicit: true, start: 'middle', sources: { top: true, liked: true, playlists: true, albums: true } },
     phase: 'lobby', rounds: [], idx: -1, votes: new Map(), deadline: 0, timer: 0,
     reveal: null, end: null, pairs: null,
 
@@ -1209,6 +1335,9 @@ function makeHost() {
           if (isHost && this.phase === 'lobby') {
             if (TARGET_OPTS.includes(msg.target)) this.settings.target = msg.target;
             if (SECS_OPTS.includes(msg.seconds)) this.settings.seconds = msg.seconds;
+            if (typeof msg.explicit === 'boolean') this.settings.explicit = msg.explicit;
+            if (START_OPTS.includes(msg.start)) this.settings.start = msg.start;
+            if (msg.sources && typeof msg.sources === 'object') for (const k of SOURCES) if (typeof msg.sources[k] === 'boolean') this.settings.sources[k] = msg.sources[k];
             this.broadcast();
           }
           break;
@@ -1218,19 +1347,23 @@ function makeHost() {
         case 'lobby': if (isHost && this.phase === 'end') this.toLobby(); break;
       }
     },
+    // A song plays only if one of its sources is switched on and it passes the explicit filter.
+    fits(s) { return (this.settings.explicit || !s.explicit) && s.src.some((k) => this.settings.sources[k]); },
     canStart() {
       const ps = [...this.players.values()].filter((p) => p.connected);
       if (ps.length < 2) return { ok: false, why: 'start.needPlayer' };
       if (ps.filter((p) => p.songs.length > 0).length < 2) return { ok: false, why: 'start.needSongs' };
-      const uniq = new Set(); ps.forEach((p) => p.songs.forEach((s) => uniq.add(s.id)));
-      if (uniq.size < 3) return { ok: false, why: 'start.needThree' };
+      if (!SOURCES.some((k) => this.settings.sources[k])) return { ok: false, why: 'start.noSources' };
+      const uniq = new Set(); let owners = 0;
+      for (const p of ps) { const ok = p.songs.filter((s) => this.fits(s)); if (ok.length) owners++; ok.forEach((s) => uniq.add(s.id)); }
+      if (owners < 2 || uniq.size < 3) return { ok: false, why: 'start.filtered' };
       return { ok: true, notReady: ps.filter((p) => !p.songs.length).length };
     },
     start() {
       if (this.phase !== 'lobby' || !this.canStart().ok) return;
       const live = [...this.players.values()].filter((p) => p.connected);
       const pool = new Map();
-      for (const p of live) for (const s of p.songs) {
+      for (const p of live) for (const s of p.songs.filter((x) => this.fits(x))) {
         let e = pool.get(s.id);
         if (!e) { e = { trackId: s.id, title: s.title, thumb: s.thumb, owners: new Set() }; pool.set(s.id, e); }
         e.owners.add(p.id);
@@ -1341,7 +1474,7 @@ function makeHost() {
       const players = this.order.map((id) => this.players.get(id)).filter(Boolean).map((p) => ({
         id: p.id, name: p.name, color: p.color, songs: p.songs.length, connected: p.connected, score: p.score, host: p.id === this.hostPid,
       }));
-      const st = { t: 'state', code: this.code, phase: this.phase, settings: { ...this.settings }, players };
+      const st = { t: 'state', code: this.code, phase: this.phase, settings: { ...this.settings, sources: { ...this.settings.sources } }, players };
       if (this.phase === 'lobby') st.canStart = this.canStart();
       if (this.phase === 'round' || this.phase === 'reveal') {
         const r = this.rounds[this.idx];
@@ -1415,7 +1548,10 @@ function renderLobby(prev) {
   }));
   $('#set-target').value = String(st.settings.target);
   $('#set-secs').value = String(st.settings.seconds);
-  $('#set-target').disabled = !isHost; $('#set-secs').disabled = !isHost;
+  $('#set-explicit').value = st.settings.explicit ? '1' : '0';
+  $('#set-start').value = st.settings.start;
+  $$('#set-sources input').forEach((c) => { c.checked = !!st.settings.sources[c.dataset.src]; c.disabled = !isHost; });
+  ['#set-target', '#set-secs', '#set-explicit', '#set-start'].forEach((id) => { $(id).disabled = !isHost; });
   $('#start-btn').hidden = !isHost;
   const cs = st.canStart || { ok: false, why: 'start.needPlayer' };
   $('#start-btn').disabled = !cs.ok;
@@ -1586,7 +1722,7 @@ function tick() {
 setInterval(tick, 200);
 
 /* ============ Spotify player ============ */
-const SP = { api: null, ctrl: null, creating: false, current: null, want: null, playOnReady: false, playing: false };
+const SP = { api: null, ctrl: null, creating: false, current: null, want: null, playOnReady: false, playing: false, seekPending: false };
 window.onSpotifyIframeApiReady = (api) => { SP.api = api; if (SP.want && S.playHere) spLoad(SP.want); };
 function spLoad(id) {
   SP.want = id;
@@ -1598,14 +1734,21 @@ function spLoad(id) {
     const el = document.createElement('div');
     $('#sp-slot').replaceChildren(el);
     SP.api.createController(el, { uri, width: '100%', height: window.innerWidth < 600 ? 80 : 152 }, (ctrl) => {
-      SP.ctrl = ctrl; SP.creating = false; SP.current = id; SP.playOnReady = true;
+      SP.ctrl = ctrl; SP.creating = false; SP.current = id; SP.playOnReady = true; SP.seekPending = true;
       ctrl.addListener('ready', () => { if (SP.playOnReady) { SP.playOnReady = false; try { ctrl.play(); } catch (e) { /* user can press play */ } } });
-      ctrl.addListener('playback_update', (ev) => { SP.playing = !!(ev && ev.data && !ev.data.isPaused); reels(); });
+      ctrl.addListener('playback_update', (ev) => {
+        const d = (ev && ev.data) || {};
+        SP.playing = !d.isPaused; reels();
+        if (!SP.seekPending || d.isPaused || !(d.duration > 0)) return;
+        SP.seekPending = false;
+        const middle = S.pub && S.pub.settings && S.pub.settings.start === 'middle';
+        if (middle && d.duration > 60000 && (d.position || 0) < 10000) { try { ctrl.seek(Math.round((d.duration * 0.4) / 1000)); } catch (e) { /* ignore */ } }
+      });
       $('#sp-status').textContent = t('sp.hint');
       if (SP.want !== id) spLoad(SP.want);
     });
   } else if (SP.current !== id) {
-    SP.current = id; SP.playOnReady = true;
+    SP.current = id; SP.playOnReady = true; SP.seekPending = true;
     SP.ctrl.loadUri(uri);
     setTimeout(() => { if (SP.playOnReady && SP.current === id) { SP.playOnReady = false; try { SP.ctrl.play(); } catch (e) { /* ignore */ } } }, 1800);
   } else {
@@ -1638,9 +1781,13 @@ const bcIn = spChannel();
 if (bcIn) bcIn.addEventListener('message', (e) => onSpotifyResult(e.data));
 window.addEventListener('storage', (e) => { if (e.key === 'wt-sp-result' && e.newValue) { try { onSpotifyResult(JSON.parse(e.newValue)); } catch (err) { /* ignore */ } } });
 
-const sendSettings = () => sendHost({ t: 'settings', target: Number($('#set-target').value), seconds: Number($('#set-secs').value) });
-$('#set-target').addEventListener('change', sendSettings);
-$('#set-secs').addEventListener('change', sendSettings);
+const sendSettings = () => sendHost({
+  t: 'settings', target: Number($('#set-target').value), seconds: Number($('#set-secs').value),
+  explicit: $('#set-explicit').value === '1', start: $('#set-start').value,
+  sources: Object.fromEntries($$('#set-sources input').map((c) => [c.dataset.src, c.checked])),
+});
+['#set-target', '#set-secs', '#set-explicit', '#set-start'].forEach((id) => $(id).addEventListener('change', sendSettings));
+$('#set-sources').addEventListener('change', sendSettings);
 $('#start-btn').addEventListener('click', () => sendHost({ t: 'start' }));
 $('#copy-link').addEventListener('click', async () => {
   const link = inviteLink();

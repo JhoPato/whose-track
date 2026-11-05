@@ -8,12 +8,12 @@ Live at https://whosetrack.discloud.dev/
 
 - `public/index.html` is the whole game. `server.js` is a tiny dependency-free Node server that serves it (port 8080 on Discloud).
 - Browser-to-browser multiplayer with [PeerJS](https://peerjs.com/). The host's browser runs the room, so if the host closes the tab the game ends.
-- Spotify sign-in uses the Authorization Code flow with PKCE in a new tab (no client secret, no stored token). It reads `/me/top/tracks` (last ~6 months, 25 songs) once and hands the songs back to the game tab.
+- Spotify sign-in uses the Authorization Code flow with PKCE in a new tab (no client secret, no stored token). Each tape is a random mix of the player's library: most played (all periods), random pages of liked songs, random stretches of playlists they made, and tracks from random saved albums. The host can switch each source on or off, skip explicit songs, and start songs in the middle or at the beginning.
 - Audio plays through Spotify's official embed player: a 30-second preview, or the full track for anyone signed in to Spotify in that browser.
 
 ## Spotify setup
 
-1. Create an app at https://developer.spotify.com/dashboard (needs Spotify Premium) with the Web API and these redirect URIs:
+1. Create an app at https://developer.spotify.com/dashboard (needs Spotify Premium) with the Web API and these redirect URIs (scopes requested: user-top-read, user-library-read, playlist-read-private, playlist-read-collaborative):
    - `https://whosetrack.discloud.dev/`
    - `http://127.0.0.1:8765/` (local testing)
 2. Put its Client ID in `SPOTIFY_CLIENT_ID` at the top of the script in `public/index.html` (or set the `SPOTIFY_CLIENT_ID` environment variable for `server.js`).
