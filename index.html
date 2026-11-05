@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Fone Alheio</title>
-<meta name="description" content="Jogo musical entre amigos: toca uma música e todo mundo tenta adivinhar de quem é o fone.">
+<title>Whose Track?</title>
+<meta name="description" content="A music party game for friends: a song plays and everyone guesses whose it is.">
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#1a226b">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 44'%3E%3Crect x='2' y='2' width='60' height='40' rx='6' fill='%23ffcf3f' stroke='%231c1d2e' stroke-width='3'/%3E%3Crect x='12' y='12' width='40' height='14' rx='7' fill='%231c1d2e'/%3E%3Ccircle cx='21' cy='19' r='4' fill='%23f4f1e6'/%3E%3Ccircle cx='43' cy='19' r='4' fill='%23f4f1e6'/%3E%3C/svg%3E">
@@ -276,6 +276,13 @@ kbd{font:600 12px/1 var(--font-mono);background:var(--paper-shade);border:1px so
 .banner .btn{box-shadow:none}
 .toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 20px);transform:translateX(-50%);z-index:40;background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:8px;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,.35);max-width:calc(100% - 32px)}
 
+/* ---------- language switch ---------- */
+.langsw{display:inline-flex;flex:none;border:2px solid var(--on-desk-soft);border-radius:8px;overflow:hidden}
+.langsw button{background:transparent;border:0;color:var(--on-desk-soft);font:700 12px/1 var(--font-mono);letter-spacing:.08em;padding:8px 10px;cursor:pointer}
+.langsw button[aria-pressed=true]{background:var(--accent);color:var(--ink)}
+.langsw button:focus-visible{outline-offset:-3px}
+.home-bar{justify-content:flex-end;margin-bottom:0}
+
 @media (max-width:860px){
   .home,.lobby-grid,.game-grid,.end-grid{grid-template-columns:minmax(0,1fr)}
   .home{gap:30px;padding-block:8px 0}
@@ -295,6 +302,7 @@ kbd{font:600 12px/1 var(--font-mono);background:var(--paper-shade);border:1px so
   .btn{transition:none}
 }
 </style>
+
 </head>
 <body>
 
@@ -314,110 +322,114 @@ kbd{font:600 12px/1 var(--font-mono);background:var(--paper-shade);border:1px so
 
 <!-- ================= HOME ================= -->
 <main class="wrap" data-screen="home">
+  <header class="bar home-bar">
+    <div class="langsw" role="group" data-i18n-aria="lang.group"><button type="button" data-lang="en">EN</button><button type="button" data-lang="pt">PT</button></div>
+  </header>
   <div class="home">
     <section class="hero">
-      <h1>Fone<span>Alheio</span></h1>
-      <p class="tagline">Toca uma música. A galera tenta adivinhar de quem é o fone.</p>
+      <h1>Whose<span>Track?</span></h1>
+      <p class="tagline" data-i18n="home.tagline"></p>
       <ol class="steps">
-        <li><span><b>Alguém cria a sala</b> e manda o link pro grupo.</span></li>
-        <li><span><b>Cada um cola links de músicas</b> que anda ouvindo no Spotify. Ninguém vê as músicas dos outros.</span></li>
-        <li><span><b>A cada faixa, todo mundo palpita</b> de quem é aquela música. Quem tem a música ganha ponto se ninguém desconfiar.</span></li>
+        <li><span data-i18n-html="home.step1"></span></li>
+        <li><span data-i18n-html="home.step2"></span></li>
+        <li><span data-i18n-html="home.step3"></span></li>
       </ol>
     </section>
-    <section class="card entry" aria-label="Entrar no jogo">
+    <section class="card entry" data-i18n-aria="home.entry">
       <div class="stripe"></div>
       <div class="field">
-        <label for="name-input">Seu nome</label>
-        <input type="text" id="name-input" maxlength="20" autocomplete="nickname" placeholder="Como o grupo te chama">
+        <label for="name-input" data-i18n="home.name"></label>
+        <input type="text" id="name-input" maxlength="20" autocomplete="nickname" data-i18n-ph="home.namePh">
       </div>
-      <button class="btn primary big" id="create-btn">Criar sala</button>
-      <div class="or">ou entre numa sala</div>
+      <button class="btn primary big" id="create-btn" data-i18n="home.create"></button>
+      <div class="or" data-i18n="home.or"></div>
       <div class="field">
-        <label for="code-input">Código da sala</label>
+        <label for="code-input" data-i18n="home.code"></label>
         <div class="joinrow">
           <input type="text" id="code-input" maxlength="5" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="K7RTB">
-          <button class="btn" id="join-btn">Entrar</button>
+          <button class="btn" id="join-btn" data-i18n="home.join"></button>
         </div>
       </div>
       <p class="msg" id="home-msg" role="status"></p>
     </section>
   </div>
-  <p class="fineprint">A sala vive no navegador de quem criou: se o host fechar a aba, a partida acaba. A música toca pelo player do Spotify; quem estiver logado no Spotify neste navegador ouve a faixa inteira, os outros ouvem uma prévia de 30 segundos.</p>
+  <p class="fineprint" data-i18n="home.fine"></p>
 </main>
 
 <!-- ================= LOBBY ================= -->
 <main class="wrap" data-screen="lobby" hidden>
   <header class="bar">
-    <span class="logo"><svg aria-hidden="true"><use href="#i-cass"/></svg>Fone <b>Alheio</b></span>
+    <span class="logo"><svg aria-hidden="true"><use href="#i-cass"/></svg>Whose <b>Track?</b></span>
     <span class="grow"></span>
-    <div class="roomchip"><span class="lbl">Sala</span><strong id="room-code">-----</strong>
-      <button class="btn small" id="copy-link">Copiar convite</button></div>
-    <button class="btn ghost small" id="leave-lobby">Sair</button>
+    <div class="roomchip"><span class="lbl" data-i18n="bar.room"></span><strong id="room-code">-----</strong>
+      <button class="btn small" id="copy-link" data-i18n="bar.copy"></button></div>
+    <button class="btn ghost small" id="leave-lobby" data-i18n="bar.leave"></button>
+    <div class="langsw" role="group" data-i18n-aria="lang.group"><button type="button" data-lang="en">EN</button><button type="button" data-lang="pt">PT</button></div>
   </header>
 
   <div class="lobby-grid">
     <section class="card tape-card" aria-labelledby="tape-h" style="--c:var(--me)">
       <div class="stripe"></div>
-      <h2 id="tape-h">Sua fita <small id="my-count">0 músicas</small></h2>
-      <p class="intro">Cole links de músicas que você ouve de verdade. De 8 a 15 é um bom número. Só você vê essa lista.</p>
+      <h2 id="tape-h"><span data-i18n="tape.title"></span> <small id="my-count"></small></h2>
+      <p class="intro" data-i18n="tape.intro"></p>
       <div class="field">
-        <label for="paste">Links do Spotify</label>
+        <label for="paste" data-i18n="tape.links"></label>
         <textarea id="paste" placeholder="https://open.spotify.com/track/..."></textarea>
       </div>
       <div class="addrow">
-        <button class="btn primary" id="add-btn">Adicionar à fita</button>
+        <button class="btn primary" id="add-btn" data-i18n="tape.add"></button>
         <p class="msg" id="paste-msg" role="status"></p>
       </div>
       <details class="help">
-        <summary>Como copiar várias músicas do Spotify</summary>
+        <summary data-i18n="tape.helpSum"></summary>
         <ul>
-          <li><b>No computador:</b> abra uma playlist com o que você mais ouve (a do seu Wrapped, "No Repeat" ou suas Curtidas). Clique numa música, aperte <kbd>Ctrl</kbd>+<kbd>A</kbd> pra selecionar todas (ou segure <kbd>Ctrl</kbd> e clique nas que quiser), depois <kbd>Ctrl</kbd>+<kbd>C</kbd> e cole aqui. No Mac é <kbd>Cmd</kbd>.</li>
-          <li><b>No celular:</b> na música, toque em <b>⋯</b>, depois <b>Compartilhar</b> e <b>Copiar link</b>. Cole aqui uma de cada vez.</li>
-          <li>Links de playlist ou álbum inteiro não funcionam, só de músicas.</li>
+          <li data-i18n-html="tape.help1"></li>
+          <li data-i18n-html="tape.help2"></li>
+          <li data-i18n="tape.help3"></li>
         </ul>
       </details>
       <ol class="songs" id="song-list"></ol>
-      <p class="empty-songs" id="song-empty">Fita virgem. Cole uns links aí em cima.</p>
+      <p class="empty-songs" id="song-empty" data-i18n="tape.empty"></p>
       <div class="tape-foot">
-        <span class="muted" style="font-size:13px">Máximo de 50 músicas.</span>
-        <button class="linkbtn" id="clear-songs">Apagar todas</button>
+        <span class="muted" style="font-size:13px" data-i18n="tape.max"></span>
+        <button class="linkbtn" id="clear-songs"></button>
       </div>
     </section>
 
     <div class="side">
       <section class="card" aria-labelledby="room-h">
-        <h2 id="room-h">Na sala <small id="pcount"></small></h2>
+        <h2 id="room-h"><span data-i18n="room.title"></span> <small id="pcount"></small></h2>
         <ul class="plist" id="player-list"></ul>
-        <label class="readyrow"><input type="checkbox" id="ready-box"> Minha fita está pronta</label>
+        <label class="readyrow"><input type="checkbox" id="ready-box"> <span data-i18n="room.readyBox"></span></label>
       </section>
 
       <section class="card" aria-labelledby="match-h">
-        <h2 id="match-h">Partida</h2>
+        <h2 id="match-h" data-i18n="match.title"></h2>
         <div class="settings-grid">
           <div class="field">
-            <label for="set-rounds">Faixas</label>
+            <label for="set-rounds" data-i18n="match.tracks"></label>
             <select id="set-rounds">
-              <option value="8">8</option><option value="12">12</option><option value="16">16</option><option value="20">20</option><option value="0">Todas</option>
+              <option value="8">8</option><option value="12">12</option><option value="16">16</option><option value="20">20</option><option value="0" data-i18n="match.all"></option>
             </select>
           </div>
           <div class="field">
-            <label for="set-secs">Tempo pra palpitar</label>
+            <label for="set-secs" data-i18n="match.time"></label>
             <select id="set-secs">
-              <option value="20">20 s</option><option value="30">30 s</option><option value="45">45 s</option><option value="60">60 s</option><option value="0">Sem limite</option>
+              <option value="20">20 s</option><option value="30">30 s</option><option value="45">45 s</option><option value="60">60 s</option><option value="0" data-i18n="match.noLimit"></option>
             </select>
           </div>
         </div>
         <p id="start-why"></p>
-        <button class="btn primary big" id="start-btn">Começar a fita</button>
+        <button class="btn primary big" id="start-btn" data-i18n="match.start"></button>
       </section>
 
       <details class="rules" open>
-        <summary>Pontos</summary>
+        <summary data-i18n="rules.title"></summary>
         <ul>
-          <li>Pode marcar mais de uma pessoa: às vezes a mesma música está na fita de dois.</li>
-          <li><span class="pts">+100</span> por pessoa certa, <span class="pts">−50</span> por pessoa errada.</li>
-          <li><span class="pts">+50</span> se acertar exatamente quem tem a música.</li>
-          <li>Se a música é sua: <span class="pts">+40</span> por cada um que não desconfiou de você.</li>
+          <li data-i18n="rules.1"></li>
+          <li data-i18n-html="rules.2"></li>
+          <li data-i18n-html="rules.3"></li>
+          <li data-i18n-html="rules.4"></li>
         </ul>
       </details>
     </div>
@@ -427,15 +439,16 @@ kbd{font:600 12px/1 var(--font-mono);background:var(--paper-shade);border:1px so
 <!-- ================= GAME ================= -->
 <main class="wrap" data-screen="game" hidden>
   <header class="bar">
-    <span class="logo"><svg aria-hidden="true"><use href="#i-cass"/></svg>Fone <b>Alheio</b></span>
+    <span class="logo"><svg aria-hidden="true"><use href="#i-cass"/></svg>Whose <b>Track?</b></span>
     <span class="grow"></span>
-    <div class="sidelabel" id="side-label">Lado A · Faixa 01<small id="round-of">1 de 12</small></div>
-    <div class="counter" id="counter" role="timer" aria-label="Tempo restante"><span>0</span><span>3</span><span>0</span></div>
+    <div class="sidelabel"><span id="side-text"></span><small id="round-of"></small></div>
+    <div class="counter" id="counter" role="timer" data-i18n-aria="game.timer"><span>0</span><span>3</span><span>0</span></div>
+    <div class="langsw" role="group" data-i18n-aria="lang.group"><button type="button" data-lang="en">EN</button><button type="button" data-lang="pt">PT</button></div>
   </header>
   <div class="timebar"><i id="timebar-fill"></i></div>
 
   <div class="game-grid">
-    <section class="deck" aria-label="Música da vez">
+    <section class="deck" data-i18n-aria="game.deck">
       <div class="cassette" id="cassette">
         <div class="cass-label" id="cass-label">
           <span class="side" id="cass-side">A</span>
@@ -443,8 +456,8 @@ kbd{font:600 12px/1 var(--font-mono);background:var(--paper-shade);border:1px so
             <span class="ph" id="track-ph"></span>
             <img id="track-thumb" alt="" hidden>
             <div>
-              <p id="track-title">Faixa misteriosa</p>
-              <p class="cass-of" id="cass-of">FAIXA 1 DE 12</p>
+              <p id="track-title"></p>
+              <p class="cass-of" id="cass-of"></p>
             </div>
           </div>
         </div>
@@ -457,32 +470,32 @@ kbd{font:600 12px/1 var(--font-mono);background:var(--paper-shade);border:1px so
       </div>
       <div class="player-box">
         <div id="sp-slot"></div>
-        <p class="sp-status" id="sp-status">Se a música não começar sozinha, aperte o play no player.</p>
+        <p class="sp-status" id="sp-status"></p>
       </div>
-      <label class="toggle"><input type="checkbox" id="play-here"><span>Tocar a música neste aparelho</span><small>Se estão todos no mesmo lugar, deixem só um aparelho tocando.</small></label>
+      <label class="toggle"><input type="checkbox" id="play-here"><span data-i18n="game.playHere"></span><small data-i18n="game.playHereHint"></small></label>
     </section>
 
     <section class="card play-card">
       <div class="stripe" style="--c:var(--me)"></div>
       <div id="round-panel">
-        <p class="note" id="mine-note" hidden>Essa música é sua. Faça cara de paisagem. Se acha que mais alguém tem ela, marque; se não, confirme sem marcar ninguém.</p>
-        <h2>De quem é esse fone?</h2>
-        <p class="sub">Pode marcar mais de uma pessoa. Os palpites só aparecem na revelação.</p>
+        <p class="note" id="mine-note" data-i18n="game.mine" hidden></p>
+        <h2 data-i18n="game.q"></h2>
+        <p class="sub" data-i18n="game.sub"></p>
         <div class="pick-grid" id="pick-grid"></div>
-        <button class="btn primary big" id="lock-btn">Cravar palpite</button>
+        <button class="btn primary big" id="lock-btn"></button>
         <div class="vote-status" id="vote-status"></div>
         <div class="hostrow" id="host-round" hidden>
-          <button class="btn ghost small" id="reveal-now">Revelar agora</button>
+          <button class="btn ghost small" id="reveal-now" data-i18n="game.revealNow"></button>
         </div>
       </div>
       <div id="reveal-panel" hidden>
-        <h2 id="reveal-title">Essa era de…</h2>
+        <h2 id="reveal-title"></h2>
         <div class="owners" id="owners"></div>
         <ul class="rrows" id="reveal-rows"></ul>
-        <h3 class="reveal-h3">Placar</h3>
+        <h3 class="reveal-h3" data-i18n="rev.board"></h3>
         <ol class="board" id="board"></ol>
         <div class="end-actions">
-          <button class="btn primary big" id="next-btn" hidden>Próxima faixa</button>
+          <button class="btn primary big" id="next-btn" hidden></button>
         </div>
         <p id="next-wait"></p>
       </div>
@@ -493,21 +506,23 @@ kbd{font:600 12px/1 var(--font-mono);background:var(--paper-shade);border:1px so
 <!-- ================= END ================= -->
 <main class="wrap" data-screen="end" hidden>
   <header class="bar">
-    <span class="logo"><svg aria-hidden="true"><use href="#i-cass"/></svg>Fone <b>Alheio</b></span>
+    <span class="logo"><svg aria-hidden="true"><use href="#i-cass"/></svg>Whose <b>Track?</b></span>
+    <span class="grow"></span>
+    <div class="langsw" role="group" data-i18n-aria="lang.group"><button type="button" data-lang="en">EN</button><button type="button" data-lang="pt">PT</button></div>
   </header>
-  <h1 class="end-title">Fim<span>da fita</span></h1>
+  <h1 class="end-title" data-i18n-html="end.title"></h1>
   <div class="end-grid">
     <section class="card">
       <div class="stripe"></div>
-      <h2>Placar final</h2>
+      <h2 data-i18n="end.board"></h2>
       <ol class="podium" id="podium" style="margin-top:14px"></ol>
     </section>
     <div class="side">
       <div class="awards" id="awards"></div>
       <div class="end-actions">
-        <button class="btn primary big" id="again-btn" hidden>Jogar de novo com as mesmas fitas</button>
+        <button class="btn primary big" id="again-btn" data-i18n="end.again" hidden></button>
         <p id="again-wait"></p>
-        <button class="btn ghost" id="leave-end">Sair da sala</button>
+        <button class="btn ghost" id="leave-end" data-i18n="end.leave"></button>
       </div>
     </div>
   </div>
@@ -516,14 +531,14 @@ kbd{font:600 12px/1 var(--font-mono);background:var(--paper-shade);border:1px so
 <div class="banner" id="banner" role="alert" hidden><span class="grow" id="banner-text"></span><span id="banner-actions" style="display:flex;gap:8px"></span></div>
 <div class="toast" id="toast" role="status" hidden></div>
 
-<noscript><p class="wrap">O Fone Alheio precisa de JavaScript ligado.</p></noscript>
+<noscript><p class="wrap">Whose Track? needs JavaScript turned on. / O Whose Track? precisa de JavaScript ligado.</p></noscript>
 
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script>
 'use strict';
 
 /* ============ constants & helpers ============ */
-const PREFIX = 'fonealheio-v1-';
+const PREFIX = 'whosetrack-v1-';
 const MAX_PLAYERS = 8;
 const MAX_SONGS = 50;
 const PTS = { hit: 100, miss: -50, exact: 50, fooled: 40 };
@@ -534,9 +549,9 @@ const SECS_OPTS = [20, 30, 45, 60, 0];
 const TRACK_ID = /^[A-Za-z0-9]{22}$/;
 
 const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const shuffle = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
-const plural = (n, one, many) => n + ' ' + (n === 1 ? one : many);
 const pad2 = (n) => String(n).padStart(2, '0');
 
 function mkStore(kind) {
@@ -548,7 +563,283 @@ function mkStore(kind) {
 const ls = mkStore('localStorage');
 const ss = mkStore('sessionStorage');
 
-const myPid = ss.get('fa-pid', null) || (() => { const id = 'p' + Math.random().toString(36).slice(2, 10); ss.set('fa-pid', id); return id; })();
+/* ============ translations (English is the main language) ============ */
+const I18N = {
+  en: {
+    'lang.group': 'Language',
+    'home.tagline': 'A song plays. Everyone guesses whose headphones it came from.',
+    'home.step1': '<b>Someone creates a room</b> and sends the link to the group.',
+    'home.step2': '<b>Everyone pastes links to songs</b> they’ve been listening to on Spotify. Nobody sees anyone else’s list.',
+    'home.step3': '<b>Every track, everyone guesses</b> whose song it is. If it’s yours, you score when nobody suspects you.',
+    'home.entry': 'Join the game',
+    'home.name': 'Your name',
+    'home.namePh': 'What your friends call you',
+    'home.create': 'Create room',
+    'home.or': 'or join a room',
+    'home.code': 'Room code',
+    'home.join': 'Join',
+    'home.fine': 'The room lives in the host’s browser: if the host closes the tab, the game ends. Music plays through Spotify’s player. Anyone signed in to Spotify in this browser hears the full track; everyone else hears a 30-second preview.',
+    'home.invited': 'You’ve been invited to room {code}. Enter your name and click Join.',
+    'home.creating': 'Creating room…',
+    'home.joining': 'Joining room {code}…',
+    'err.name': 'Enter your name first.',
+    'err.codeLen': 'The room code is 5 letters and numbers.',
+    'err.noPeer': 'The connection part of the game didn’t load. Reload the page.',
+    'err.notFound': 'Couldn’t find room {code}. Check the code or ask the host for a new link.',
+    'err.noAnswer': 'The room didn’t answer. The host may have closed the page.',
+    'err.full': 'The room is full (max {n} players).',
+    'err.refused': 'The room refused the connection.',
+    'err.browser': 'This browser can’t run the game. Try an up-to-date Chrome, Edge, Firefox or Safari.',
+    'err.network': 'Couldn’t reach the room server. Check your internet and try again.',
+    'err.generic': 'Connection problem ({type}). Try again.',
+    'bar.room': 'Room',
+    'bar.copy': 'Copy invite',
+    'bar.leave': 'Leave',
+    'toast.copied': 'Link copied. Send it to the group!',
+    'toast.copyThis': 'Copy this link: {link}',
+    'tape.title': 'Your tape',
+    'tape.intro': 'Paste links to songs you actually listen to. 8 to 15 is a good amount. Only you can see this list.',
+    'tape.links': 'Spotify links',
+    'tape.add': 'Add to tape',
+    'tape.helpSum': 'How to copy several songs from Spotify',
+    'tape.help1': '<b>On a computer:</b> open a playlist of what you play most (your Wrapped playlist, “On Repeat” or Liked Songs). Click a song, press <kbd>Ctrl</kbd>+<kbd>A</kbd> to select them all (or hold <kbd>Ctrl</kbd> and click the ones you want), then <kbd>Ctrl</kbd>+<kbd>C</kbd> and paste here. On a Mac, use <kbd>Cmd</kbd>.',
+    'tape.help2': '<b>On a phone:</b> tap <b>⋯</b> on the song, then <b>Share</b> and <b>Copy link</b>. Paste them here one at a time.',
+    'tape.help3': 'Playlist or album links don’t work, only song links.',
+    'tape.empty': 'Blank tape. Paste some links above.',
+    'tape.max': 'Up to 50 songs.',
+    'tape.clear': 'Delete all',
+    'tape.clearConfirm': 'Click again to delete',
+    'songs': ['{n} song', '{n} songs'],
+    'song.notFound': 'Couldn’t find this song on Spotify',
+    'song.loading': 'loading…',
+    'song.fallback': 'Song {id}',
+    'song.remove': 'Remove {title} from the tape',
+    'paste.short': 'Short links (spotify.link) don’t work. In Spotify, use “Copy song link”.',
+    'paste.other': 'That’s a playlist or album link. Open it, select the songs and copy those.',
+    'paste.none': 'No Spotify song links in there.',
+    'paste.added': ['{n} song added', '{n} songs added'],
+    'paste.dup': ['{n} duplicate skipped', '{n} duplicates skipped'],
+    'paste.cut': '{n} left out (the limit is {max})',
+    'paste.otherSkipped': 'playlist and album links were skipped',
+    'room.title': 'In the room',
+    'room.you': '(you)',
+    'room.host': 'host',
+    'room.ready': 'ready',
+    'room.picking': 'picking',
+    'room.readyBox': 'My tape is ready',
+    'match.title': 'Game',
+    'match.tracks': 'Tracks',
+    'match.time': 'Time to guess',
+    'match.all': 'All',
+    'match.noLimit': 'No limit',
+    'match.start': 'Start the tape',
+    'match.guest': 'The host picks the options and starts the game.',
+    'start.needPlayer': 'Send the invite: you need at least one more person.',
+    'start.needSongs': 'At least two people need songs on their tape.',
+    'start.needThree': 'Add at least 3 songs in total.',
+    'start.notReady': ['{n} person hasn’t marked their tape ready. ', '{n} people haven’t marked their tape ready. '],
+    'start.allReady': 'Everyone’s ready. ',
+    'start.tracks': ['{n} track this game.', '{n} tracks this game.'],
+    'rules.title': 'Scoring',
+    'rules.1': 'You can pick more than one person: sometimes the same song is on two tapes.',
+    'rules.2': '<span class="pts">+100</span> for each right person, <span class="pts">−50</span> for each wrong one.',
+    'rules.3': '<span class="pts">+50</span> for naming exactly who has the song.',
+    'rules.4': 'If it’s your song: <span class="pts">+40</span> for each player who didn’t suspect you.',
+    'game.side': 'Side {side} · Track {no}',
+    'game.of': '{n} of {total}',
+    'game.trackOf': 'TRACK {n} OF {total}',
+    'game.mystery': 'Mystery track',
+    'game.timer': 'Time left',
+    'game.deck': 'Now playing',
+    'sp.hint': 'If the song doesn’t start by itself, press play on the player.',
+    'sp.loading': 'Loading the Spotify player…',
+    'game.playHere': 'Play the music on this device',
+    'game.playHereHint': 'If you’re all in the same place, keep just one device playing.',
+    'game.mine': 'This one’s yours. Keep a straight face. If you think someone else has it too, pick them; if not, confirm without picking anyone.',
+    'game.q': 'Whose track is this?',
+    'game.sub': 'You can pick more than one person. Guesses stay hidden until the reveal.',
+    'game.lock': 'Lock in guess',
+    'game.locked': 'Guess locked in',
+    'game.onlyMe': 'Confirm: only I have this one',
+    'game.voted': '{n} of {m} locked in:',
+    'game.youChip': 'you',
+    'game.revealNow': 'Reveal now',
+    'rev.multi': 'This one was on more than one tape',
+    'rev.single': 'This one belonged to…',
+    'rev.had': 'had the song',
+    'rev.noGuess': 'didn’t guess',
+    'rev.nobody': 'picked nobody',
+    'rev.exact': 'bullseye',
+    'rev.fooled': 'fooled {n}',
+    'rev.board': 'Scoreboard',
+    'rev.next': 'Next track',
+    'rev.final': 'See final scores',
+    'rev.wait': 'Waiting for the host to play the next track…',
+    'rev.waitLast': 'Last track. Waiting for the host to open the final scores…',
+    'end.title': 'End of<span>the tape</span>',
+    'end.board': 'Final scores',
+    'aw.det': 'Detective',
+    'aw.detWhy': ['Spotted {n} song owner.', 'Spotted {n} song owners.'],
+    'aw.poker': 'Poker face',
+    'aw.pokerWhy': ['Went unnoticed {n} time with their own songs.', 'Went unnoticed {n} times with their own songs.'],
+    'aw.twins': 'Twin headphones',
+    'aw.twinsWhy': ['{n} song in common on their tapes.', '{n} songs in common on their tapes.'],
+    'aw.and': ' and ',
+    'end.again': 'Play again with the same tapes',
+    'end.againWait': 'If the host starts another game, you’ll go back to the room automatically.',
+    'end.leave': 'Leave room',
+    'ban.lost': 'Lost the connection to the room. If the host closed the page, the game is over.',
+    'ban.reconnect': 'Reconnect',
+    'ban.leave': 'Leave',
+    'ban.retry': 'Try again',
+  },
+  pt: {
+    'lang.group': 'Idioma',
+    'home.tagline': 'Toca uma música. A galera tenta adivinhar de quem é o fone.',
+    'home.step1': '<b>Alguém cria a sala</b> e manda o link pro grupo.',
+    'home.step2': '<b>Cada um cola links de músicas</b> que anda ouvindo no Spotify. Ninguém vê as músicas dos outros.',
+    'home.step3': '<b>A cada faixa, todo mundo palpita</b> de quem é aquela música. Quem tem a música ganha ponto se ninguém desconfiar.',
+    'home.entry': 'Entrar no jogo',
+    'home.name': 'Seu nome',
+    'home.namePh': 'Como o grupo te chama',
+    'home.create': 'Criar sala',
+    'home.or': 'ou entre numa sala',
+    'home.code': 'Código da sala',
+    'home.join': 'Entrar',
+    'home.fine': 'A sala vive no navegador de quem criou: se o host fechar a aba, a partida acaba. A música toca pelo player do Spotify. Quem estiver logado no Spotify neste navegador ouve a faixa inteira; os outros ouvem uma prévia de 30 segundos.',
+    'home.invited': 'Você foi convidado pra sala {code}. Coloque seu nome e clique em Entrar.',
+    'home.creating': 'Criando sala…',
+    'home.joining': 'Entrando na sala {code}…',
+    'err.name': 'Coloque seu nome primeiro.',
+    'err.codeLen': 'O código da sala tem 5 letras e números.',
+    'err.noPeer': 'A parte de conexão do jogo não carregou. Recarregue a página.',
+    'err.notFound': 'Não achei a sala {code}. Confira o código ou peça um link novo pra quem criou.',
+    'err.noAnswer': 'A sala não respondeu. Quem criou pode ter fechado a página.',
+    'err.full': 'A sala está cheia (máximo de {n} pessoas).',
+    'err.refused': 'A sala recusou a entrada.',
+    'err.browser': 'Este navegador não roda o jogo. Tente Chrome, Edge, Firefox ou Safari atualizados.',
+    'err.network': 'Não consegui falar com o servidor de salas. Confira a internet e tente de novo.',
+    'err.generic': 'Deu ruim na conexão ({type}). Tente de novo.',
+    'bar.room': 'Sala',
+    'bar.copy': 'Copiar convite',
+    'bar.leave': 'Sair',
+    'toast.copied': 'Link copiado. Manda no grupo!',
+    'toast.copyThis': 'Copie este link: {link}',
+    'tape.title': 'Sua fita',
+    'tape.intro': 'Cole links de músicas que você ouve de verdade. De 8 a 15 é um bom número. Só você vê essa lista.',
+    'tape.links': 'Links do Spotify',
+    'tape.add': 'Adicionar à fita',
+    'tape.helpSum': 'Como copiar várias músicas do Spotify',
+    'tape.help1': '<b>No computador:</b> abra uma playlist com o que você mais ouve (a do seu Wrapped, “No Repeat” ou suas Curtidas). Clique numa música, aperte <kbd>Ctrl</kbd>+<kbd>A</kbd> pra selecionar todas (ou segure <kbd>Ctrl</kbd> e clique nas que quiser), depois <kbd>Ctrl</kbd>+<kbd>C</kbd> e cole aqui. No Mac é <kbd>Cmd</kbd>.',
+    'tape.help2': '<b>No celular:</b> na música, toque em <b>⋯</b>, depois <b>Compartilhar</b> e <b>Copiar link</b>. Cole aqui uma de cada vez.',
+    'tape.help3': 'Links de playlist ou álbum inteiro não funcionam, só de músicas.',
+    'tape.empty': 'Fita virgem. Cole uns links aí em cima.',
+    'tape.max': 'Máximo de 50 músicas.',
+    'tape.clear': 'Apagar todas',
+    'tape.clearConfirm': 'Clique de novo pra apagar',
+    'songs': ['{n} música', '{n} músicas'],
+    'song.notFound': 'Não achei essa música no Spotify',
+    'song.loading': 'carregando…',
+    'song.fallback': 'Música {id}',
+    'song.remove': 'Tirar {title} da fita',
+    'paste.short': 'Links curtos (spotify.link) não funcionam. No Spotify, use “Copiar link da música”.',
+    'paste.other': 'Esse é link de playlist ou álbum. Abra, selecione as músicas e copie elas.',
+    'paste.none': 'Não achei nenhum link de música do Spotify aí.',
+    'paste.added': ['{n} música adicionada', '{n} músicas adicionadas'],
+    'paste.dup': ['{n} repetida ignorada', '{n} repetidas ignoradas'],
+    'paste.cut': '{n} ficaram de fora (limite de {max})',
+    'paste.otherSkipped': 'links de playlist e álbum foram ignorados',
+    'room.title': 'Na sala',
+    'room.you': '(você)',
+    'room.host': 'host',
+    'room.ready': 'pronto',
+    'room.picking': 'montando',
+    'room.readyBox': 'Minha fita está pronta',
+    'match.title': 'Partida',
+    'match.tracks': 'Faixas',
+    'match.time': 'Tempo pra palpitar',
+    'match.all': 'Todas',
+    'match.noLimit': 'Sem limite',
+    'match.start': 'Começar a fita',
+    'match.guest': 'Quem criou a sala escolhe as opções e começa a partida.',
+    'start.needPlayer': 'Mande o convite: precisa de pelo menos mais uma pessoa.',
+    'start.needSongs': 'Pelo menos duas pessoas precisam colocar músicas na fita.',
+    'start.needThree': 'Coloquem pelo menos 3 músicas no total.',
+    'start.notReady': ['{n} pessoa ainda não marcou que a fita está pronta. ', '{n} pessoas ainda não marcaram que a fita está pronta. '],
+    'start.allReady': 'Todo mundo pronto. ',
+    'start.tracks': ['{n} faixa nesta partida.', '{n} faixas nesta partida.'],
+    'rules.title': 'Pontos',
+    'rules.1': 'Pode marcar mais de uma pessoa: às vezes a mesma música está na fita de dois.',
+    'rules.2': '<span class="pts">+100</span> por pessoa certa, <span class="pts">−50</span> por pessoa errada.',
+    'rules.3': '<span class="pts">+50</span> se acertar exatamente quem tem a música.',
+    'rules.4': 'Se a música é sua: <span class="pts">+40</span> por cada um que não desconfiou de você.',
+    'game.side': 'Lado {side} · Faixa {no}',
+    'game.of': '{n} de {total}',
+    'game.trackOf': 'FAIXA {n} DE {total}',
+    'game.mystery': 'Faixa misteriosa',
+    'game.timer': 'Tempo restante',
+    'game.deck': 'Música da vez',
+    'sp.hint': 'Se a música não começar sozinha, aperte o play no player.',
+    'sp.loading': 'Carregando o player do Spotify…',
+    'game.playHere': 'Tocar a música neste aparelho',
+    'game.playHereHint': 'Se estão todos no mesmo lugar, deixem só um aparelho tocando.',
+    'game.mine': 'Essa música é sua. Faça cara de paisagem. Se acha que mais alguém tem ela, marque; se não, confirme sem marcar ninguém.',
+    'game.q': 'De quem é esse fone?',
+    'game.sub': 'Pode marcar mais de uma pessoa. Os palpites só aparecem na revelação.',
+    'game.lock': 'Cravar palpite',
+    'game.locked': 'Palpite cravado',
+    'game.onlyMe': 'Confirmar: só eu tenho essa',
+    'game.voted': '{n} de {m} cravaram:',
+    'game.youChip': 'você',
+    'game.revealNow': 'Revelar agora',
+    'rev.multi': 'Essa estava em mais de uma fita',
+    'rev.single': 'Essa era de…',
+    'rev.had': 'tinha a música',
+    'rev.noGuess': 'não palpitou',
+    'rev.nobody': 'não marcou ninguém',
+    'rev.exact': 'na mosca',
+    'rev.fooled': 'enganou {n}',
+    'rev.board': 'Placar',
+    'rev.next': 'Próxima faixa',
+    'rev.final': 'Ver o placar final',
+    'rev.wait': 'Esperando o host soltar a próxima faixa…',
+    'rev.waitLast': 'Última faixa. Esperando o host abrir o placar final…',
+    'end.title': 'Fim<span>da fita</span>',
+    'end.board': 'Placar final',
+    'aw.det': 'Detetive',
+    'aw.detWhy': ['Acertou {n} dono de música.', 'Acertou {n} donos de música.'],
+    'aw.poker': 'Cara de paisagem',
+    'aw.pokerWhy': ['Passou despercebido {n} vez com as próprias músicas.', 'Passou despercebido {n} vezes com as próprias músicas.'],
+    'aw.twins': 'Fones gêmeos',
+    'aw.twinsWhy': ['{n} música em comum nas fitas.', '{n} músicas em comum nas fitas.'],
+    'aw.and': ' e ',
+    'end.again': 'Jogar de novo com as mesmas fitas',
+    'end.againWait': 'Se o host quiser outra partida, você volta pra sala automaticamente.',
+    'end.leave': 'Sair da sala',
+    'ban.lost': 'Perdi a conexão com a sala. Se quem criou fechou a página, a partida acabou.',
+    'ban.reconnect': 'Reconectar',
+    'ban.leave': 'Sair',
+    'ban.retry': 'Tentar de novo',
+  },
+};
+let LANG = ls.get('wt-lang', 'en') === 'pt' ? 'pt' : 'en';
+function t(key, vars) {
+  let s = I18N[LANG][key] ?? I18N.en[key] ?? key;
+  if (Array.isArray(s)) s = vars && vars.n === 1 ? s[0] : s[1];
+  return vars ? s.replace(/\{(\w+)\}/g, (m, k) => (k in vars ? String(vars[k]) : m)) : s;
+}
+function applyStatic() {
+  document.documentElement.lang = LANG === 'pt' ? 'pt-BR' : 'en';
+  $$('[data-i18n]').forEach((el) => { el.textContent = t(el.dataset.i18n); });
+  $$('[data-i18n-html]').forEach((el) => { el.innerHTML = t(el.dataset.i18nHtml); }); // dictionary text only, never user input
+  $$('[data-i18n-ph]').forEach((el) => { el.placeholder = t(el.dataset.i18nPh); });
+  $$('[data-i18n-aria]').forEach((el) => { el.setAttribute('aria-label', t(el.dataset.i18nAria)); });
+  $$('.langsw button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.lang === LANG ? 'true' : 'false'));
+  if (!clearArmed) $('#clear-songs').textContent = t('tape.clear');
+}
+
+/* ============ identity & client state ============ */
+const myPid = ss.get('wt-pid', null) || (() => { const id = 'p' + Math.random().toString(36).slice(2, 10); ss.set('wt-pid', id); return id; })();
 
 function cleanName(n) { return String(n ?? '').replace(/[\u0000-\u001f\u007f-\u009f​-‏‪-‮]/g, '').replace(/\s+/g, ' ').trim().slice(0, 20); }
 function cleanPid(p) { return typeof p === 'string' && /^p[a-z0-9]{4,12}$/.test(p) ? p : null; }
@@ -565,34 +856,43 @@ function sanitizeSongs(arr) {
   return out;
 }
 
-/* ============ client state ============ */
 const S = {
   role: null,          // 'host' | 'guest'
   code: null,
-  name: ls.get('fa-name', ''),
-  pub: null,           // last state from host
-  songs: sanitizeSongs(ls.get('fa-songs', [])).map((s) => ({ ...s })),
+  name: ls.get('wt-name', ''),
+  pub: null,           // last state from the host
+  songs: sanitizeSongs(ls.get('wt-songs', [])).map((s) => ({ ...s, done: true })),
   ready: false,
   picks: new Set(),
   locked: false,
-  playHere: ls.get('fa-play', true),
+  playHere: ls.get('wt-play', true),
   deadline: 0,         // performance.now() based
 };
+let clearArmed = 0;
 
-/* ============ screens, toast, banner ============ */
-function show(name) {
-  document.querySelectorAll('[data-screen]').forEach((el) => { el.hidden = el.dataset.screen !== name; });
+/* ============ screens, messages, toast, banner ============ */
+function show(name) { $$('[data-screen]').forEach((el) => { el.hidden = el.dataset.screen !== name; }); }
+
+// Messages keep their key so a language switch can repaint them.
+const MSG = { home: null, paste: null };
+function setMsg(where, key, vars, isErr) { MSG[where] = key ? { key, vars, isErr } : null; paintMsg(where); }
+function paintMsg(where) {
+  const el = $('#' + where + '-msg'); const m = MSG[where];
+  el.textContent = m ? (typeof m.key === 'function' ? m.key() : t(m.key, m.vars)) : '';
+  el.classList.toggle('err', !!(m && m.isErr));
 }
 let toastT = 0;
-function toast(text) { const t = $('#toast'); t.textContent = text; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 2400); }
-function showBanner(text, actions) {
-  $('#banner-text').textContent = text;
+function toast(text) { const el = $('#toast'); el.textContent = text; el.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { el.hidden = true; }, 2400); }
+let BANNER = null;
+function showBanner(textFn, actions) { BANNER = { textFn, actions }; paintBanner(); }
+function paintBanner() {
+  if (!BANNER) { $('#banner').hidden = true; return; }
+  $('#banner-text').textContent = BANNER.textFn();
   const box = $('#banner-actions'); box.replaceChildren();
-  for (const a of actions) { const b = document.createElement('button'); b.className = 'btn small'; b.textContent = a.label; b.onclick = a.fn; box.append(b); }
+  for (const a of BANNER.actions) { const b = document.createElement('button'); b.className = 'btn small'; b.textContent = t(a.key); b.onclick = a.fn; box.append(b); }
   $('#banner').hidden = false;
 }
-function hideBanner() { $('#banner').hidden = true; }
-function homeMsg(text, isErr) { const m = $('#home-msg'); m.textContent = text || ''; m.classList.toggle('err', !!isErr); }
+function hideBanner() { BANNER = null; paintBanner(); }
 
 /* ============ songs: parsing + metadata ============ */
 function parseInput(text) {
@@ -633,19 +933,12 @@ function applyMeta(id) {
   }
   if (changed) { saveSongs(); renderMySongs(); sendSongsSoon(); }
 }
-function saveSongs() { ls.set('fa-songs', S.songs.filter((s) => !s.bad).map(({ id, title, thumb }) => ({ id, title, thumb }))); }
+function saveSongs() { ls.set('wt-songs', S.songs.filter((s) => !s.bad).map(({ id, title, thumb }) => ({ id, title, thumb }))); }
 function sendableSongs() { return S.songs.filter((s) => !s.bad).map(({ id, title, thumb }) => ({ id, title, thumb })); }
 
 function addFromText(text) {
   const { ids, other, short } = parseInput(text);
-  const msg = $('#paste-msg'); msg.classList.remove('err');
-  if (!ids.length) {
-    msg.classList.add('err');
-    msg.textContent = short ? 'Links curtos (spotify.link) não funcionam. No Spotify, use "Copiar link da música".'
-      : other ? 'Esse é link de playlist ou álbum. Abra, selecione as músicas e copie elas.'
-      : 'Não achei nenhum link de música do Spotify aí.';
-    return;
-  }
+  if (!ids.length) { setMsg('paste', short ? 'paste.short' : other ? 'paste.other' : 'paste.none', null, true); return; }
   const have = new Set(S.songs.map((s) => s.id));
   let added = 0, dup = 0, cut = 0;
   for (const id of ids) {
@@ -654,12 +947,14 @@ function addFromText(text) {
     have.add(id); S.songs.push({ id, title: '', thumb: '', done: false }); added++;
     needMeta(id);
   }
-  const parts = [];
-  if (added) parts.push(plural(added, 'música adicionada', 'músicas adicionadas'));
-  if (dup) parts.push(plural(dup, 'repetida ignorada', 'repetidas ignoradas'));
-  if (cut) parts.push(`${cut} ficaram de fora (limite de ${MAX_SONGS})`);
-  if (other) parts.push('links de playlist/álbum foram ignorados');
-  msg.textContent = parts.join(' · ') + '.';
+  setMsg('paste', () => {
+    const parts = [];
+    if (added) parts.push(t('paste.added', { n: added }));
+    if (dup) parts.push(t('paste.dup', { n: dup }));
+    if (cut) parts.push(t('paste.cut', { n: cut, max: MAX_SONGS }));
+    if (other) parts.push(t('paste.otherSkipped'));
+    return parts.join(' · ') + '.';
+  });
   $('#paste').value = '';
   saveSongs(); renderMySongs(); sendSongsSoon();
 }
@@ -668,18 +963,17 @@ let songsT = 0;
 function sendSongsSoon() { clearTimeout(songsT); songsT = setTimeout(() => sendHost({ t: 'songs', songs: sendableSongs() }), 400); }
 
 function renderMySongs() {
-  const ol = $('#song-list');
-  ol.replaceChildren(...S.songs.map((s, i) => {
+  $('#song-list').replaceChildren(...S.songs.map((s, i) => {
     const li = document.createElement('li');
     li.className = 'song' + (s.bad ? ' bad' : '') + (!s.done && !s.title ? ' loading' : '');
-    const label = s.bad ? 'Não achei essa música no Spotify' : (s.title || (s.done ? 'Música ' + s.id.slice(0, 6) : 'carregando…'));
+    const label = s.bad ? t('song.notFound') : (s.title || (s.done ? t('song.fallback', { id: s.id.slice(0, 6) }) : t('song.loading')));
     li.innerHTML = `<span class="num">${pad2(i + 1)}</span>${s.thumb ? `<img src="${esc(s.thumb)}" alt="" loading="lazy">` : '<span class="ph"></span>'}<span class="stitle"></span><button class="x" type="button" data-id="${esc(s.id)}">×</button>`;
     li.querySelector('.stitle').textContent = label;
-    li.querySelector('.x').setAttribute('aria-label', 'Tirar ' + label + ' da fita');
+    li.querySelector('.x').setAttribute('aria-label', t('song.remove', { title: label }));
     return li;
   }));
   const n = S.songs.filter((s) => !s.bad).length;
-  $('#my-count').textContent = plural(n, 'música', 'músicas');
+  $('#my-count').textContent = t('songs', { n });
   $('#song-empty').hidden = S.songs.length > 0;
 }
 
@@ -687,85 +981,85 @@ function renderMySongs() {
 let peer = null;
 let hostConn = null;
 
-function netErrorText(err) {
-  const t = err && err.type;
-  if (t === 'browser-incompatible') return 'Este navegador não suporta o jogo. Tente Chrome, Edge, Firefox ou Safari atualizados.';
-  if (t === 'network' || t === 'server-error' || t === 'socket-error' || t === 'socket-closed') return 'Não consegui falar com o servidor de salas. Confira a internet e tente de novo.';
-  return 'Deu ruim na conexão (' + (t || 'erro') + '). Tente de novo.';
+function netError(err) {
+  const type = (err && err.type) || 'error';
+  if (type === 'browser-incompatible') return () => t('err.browser');
+  if (['network', 'server-error', 'socket-error', 'socket-closed'].includes(type)) return () => t('err.network');
+  return () => t('err.generic', { type });
 }
 function makeCode() { let c = ''; for (let i = 0; i < 5; i++) c += CODE_CHARS[Math.floor(Math.random() * CODE_CHARS.length)]; return c; }
 function readName() {
   const n = cleanName($('#name-input').value);
-  if (!n) { homeMsg('Coloque seu nome primeiro.', true); $('#name-input').focus(); return null; }
-  S.name = n; ls.set('fa-name', n); return n;
+  if (!n) { setMsg('home', 'err.name', null, true); $('#name-input').focus(); return null; }
+  S.name = n; ls.set('wt-name', n); return n;
 }
 function setHomeBusy(busy) { $('#create-btn').disabled = busy; $('#join-btn').disabled = busy; }
 function keepAlive(p) { p.on('disconnected', () => { setTimeout(() => { if (!p.destroyed && p.disconnected) { try { p.reconnect(); } catch (e) { /* retry later */ } } }, 1500); }); }
 
 function createRoom() {
-  if (typeof Peer === 'undefined') { homeMsg('Não carreguei a parte de conexão do jogo. Recarregue a página.', true); return; }
+  if (typeof Peer === 'undefined') { setMsg('home', 'err.noPeer', null, true); return; }
   if (!readName()) return;
-  setHomeBusy(true); homeMsg('Criando sala…');
+  setHomeBusy(true); setMsg('home', 'home.creating');
   const attempt = (n) => {
     const code = makeCode();
     const p = new Peer(PREFIX + code.toLowerCase(), { debug: 1 });
     let opened = false;
-    p.on('open', () => { opened = true; peer = p; S.role = 'host'; S.code = code; keepAlive(p); H.init(code, S.name); setHomeBusy(false); homeMsg(''); setUrl(code); });
+    p.on('open', () => { opened = true; peer = p; S.role = 'host'; S.code = code; keepAlive(p); H.init(code, S.name); setHomeBusy(false); setMsg('home', null); setUrl(code); });
     p.on('connection', (conn) => H.accept(conn));
     p.on('error', (err) => {
       if (opened) { console.warn('peer', err); return; }
       p.destroy();
       if (err.type === 'unavailable-id' && n < 4) { attempt(n + 1); return; }
-      setHomeBusy(false); homeMsg(netErrorText(err), true);
+      setHomeBusy(false); setMsg('home', netError(err), null, true);
     });
   };
   attempt(0);
 }
 
 function joinRoom(code, quiet) {
-  if (typeof Peer === 'undefined') { homeMsg('Não carreguei a parte de conexão do jogo. Recarregue a página.', true); return; }
+  if (typeof Peer === 'undefined') { setMsg('home', 'err.noPeer', null, true); return; }
   if (!quiet && !readName()) return;
   code = String(code || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
-  if (code.length !== 5) { homeMsg('O código da sala tem 5 letras e números.', true); return; }
+  if (code.length !== 5) { setMsg('home', 'err.codeLen', null, true); return; }
   if (peer && !peer.destroyed) peer.destroy();
   S.role = 'guest'; S.code = code;
-  setHomeBusy(true); if (!quiet) homeMsg('Entrando na sala ' + code + '…');
+  setHomeBusy(true); if (!quiet) setMsg('home', 'home.joining', { code });
   const p = new Peer({ debug: 1 }); peer = p;
   p.on('open', () => { keepAlive(p); connectToHost(); });
   p.on('error', (err) => {
     if (p !== peer) return;
-    if (err.type === 'peer-unavailable') { failJoin('Não achei a sala ' + code + '. Confira o código ou peça um link novo pra quem criou.'); return; }
-    if (!hostConn || !hostConn.open) failJoin(netErrorText(err));
+    if (err.type === 'peer-unavailable') { failJoin(() => t('err.notFound', { code })); return; }
+    if (!hostConn || !hostConn.open) failJoin(netError(err));
   });
 }
-function failJoin(text) {
+function failJoin(textFn) {
   setHomeBusy(false);
-  if (S.pub) { showBanner(text, [{ label: 'Tentar de novo', fn: () => { hideBanner(); joinRoom(S.code, true); } }, { label: 'Sair', fn: leave }]); return; }
+  if (S.pub) { showBanner(textFn, [{ key: 'ban.retry', fn: () => { hideBanner(); joinRoom(S.code, true); } }, { key: 'ban.leave', fn: leave }]); return; }
   try { peer && peer.destroy(); } catch (e) { /* ignore */ }
   peer = null; S.role = null;
-  show('home'); homeMsg(text, true);
+  show('home'); setMsg('home', textFn, null, true);
 }
 function connectToHost() {
   const conn = peer.connect(PREFIX + S.code.toLowerCase(), { reliable: true });
   hostConn = conn;
-  const t = setTimeout(() => { if (hostConn === conn && !conn.open) failJoin('A sala não respondeu. Quem criou pode ter fechado a página.'); }, 15000);
+  const timer = setTimeout(() => { if (hostConn === conn && !conn.open) failJoin(() => t('err.noAnswer')); }, 15000);
   conn.on('open', () => {
-    clearTimeout(t); hideBanner(); setHomeBusy(false); homeMsg('');
+    clearTimeout(timer); hideBanner(); setHomeBusy(false); setMsg('home', null);
     conn.send({ t: 'hello', pid: myPid, name: S.name, songs: sendableSongs(), ready: S.ready });
     setUrl(S.code);
   });
   conn.on('data', (msg) => {
     if (!msg || typeof msg !== 'object') return;
     if (msg.t === 'state') onState(msg);
-    else if (msg.t === 'error') failJoin(String(msg.msg || 'A sala recusou a entrada.'));
+    else if (msg.t === 'error') failJoin(msg.code === 'full' ? () => t('err.full', { n: msg.max || MAX_PLAYERS }) : () => t('err.refused'));
   });
   conn.on('close', () => { if (hostConn === conn && S.role === 'guest') onHostLost(); });
 }
 function onHostLost() {
   if (!S.pub) return;
-  showBanner('Perdi a conexão com a sala. Se quem criou fechou a página, a partida acabou.', [
-    { label: 'Reconectar', fn: () => { hideBanner(); if (peer && !peer.destroyed && peer.open) connectToHost(); else joinRoom(S.code, true); } },
-    { label: 'Sair', fn: leave },
+  showBanner(() => t('ban.lost'), [
+    { key: 'ban.reconnect', fn: () => { hideBanner(); if (peer && !peer.destroyed && peer.open) connectToHost(); else joinRoom(S.code, true); } },
+    { key: 'ban.leave', fn: leave },
   ]);
 }
 function sendHost(msg) {
@@ -775,15 +1069,13 @@ function sendHost(msg) {
 function setUrl(code) {
   try { const u = new URL(location.href); u.searchParams.set('sala', code); history.replaceState(null, '', u); } catch (e) { /* ignore */ }
 }
-function inviteLink() {
-  const u = new URL(location.href); u.search = ''; u.hash = ''; u.searchParams.set('sala', S.code); return u.toString();
-}
+function inviteLink() { const u = new URL(location.href); u.search = ''; u.hash = ''; u.searchParams.set('sala', S.code); return u.toString(); }
 function leave() {
   try { hostConn && hostConn.close(); } catch (e) { /* ignore */ }
   try { peer && peer.destroy(); } catch (e) { /* ignore */ }
   peer = null; hostConn = null; S.role = null; S.pub = null; S.code = null; S.deadline = 0;
   H.stop(); H = makeHost();
-  spStop(); hideBanner(); setHomeBusy(false); homeMsg('');
+  spStop(); hideBanner(); setHomeBusy(false); setMsg('home', null);
   try { const u = new URL(location.href); u.search = ''; history.replaceState(null, '', u); } catch (e) { /* ignore */ }
   show('home');
 }
@@ -818,7 +1110,7 @@ function makeHost() {
       if (!pid || pid === this.hostPid) { try { conn.close(); } catch (e) { /* ignore */ } return; }
       let p = this.players.get(pid);
       if (!p) {
-        if (this.players.size >= MAX_PLAYERS) { conn.send({ t: 'error', msg: 'A sala está cheia (máximo de ' + MAX_PLAYERS + ' pessoas).' }); setTimeout(() => conn.close(), 600); return; }
+        if (this.players.size >= MAX_PLAYERS) { conn.send({ t: 'error', code: 'full', max: MAX_PLAYERS }); setTimeout(() => conn.close(), 600); return; }
         p = this.addPlayer(pid, msg.name, conn);
       } else {
         const old = p.conn; p.conn = conn; p.connected = true;
@@ -832,7 +1124,7 @@ function makeHost() {
     addPlayer(pid, name, conn) {
       const used = new Set([...this.players.values()].map((p) => p.color));
       const color = COLORS.find((c) => !used.has(c)) || COLORS[this.players.size % COLORS.length];
-      const p = { id: pid, name: cleanName(name) || 'Alguém', color, songs: [], ready: false, connected: true, conn, score: 0, stats: { hits: 0, misses: 0, fooled: 0 } };
+      const p = { id: pid, name: cleanName(name) || '???', color, songs: [], ready: false, connected: true, conn, score: 0, stats: { hits: 0, misses: 0, fooled: 0 } };
       this.players.set(pid, p); this.order.push(pid);
       return p;
     },
@@ -870,16 +1162,14 @@ function makeHost() {
         case 'lobby': if (isHost && this.phase === 'end') this.toLobby(); break;
       }
     },
-    uniqueCount(ps) { const u = new Set(); ps.forEach((p) => p.songs.forEach((s) => u.add(s.id))); return u.size; },
     canStart() {
       const ps = [...this.players.values()].filter((p) => p.connected);
-      if (ps.length < 2) return { ok: false, why: 'Mande o convite: precisa de pelo menos mais uma pessoa.' };
-      if (ps.filter((p) => p.songs.length > 0).length < 2) return { ok: false, why: 'Pelo menos duas pessoas precisam colocar músicas na fita.' };
-      const uniq = this.uniqueCount(ps);
-      if (uniq < 3) return { ok: false, why: 'Coloquem pelo menos 3 músicas no total.' };
-      const notReady = ps.filter((p) => !p.ready).length;
-      const total = this.settings.rounds === 0 ? uniq : Math.min(this.settings.rounds, uniq);
-      return { ok: true, why: (notReady ? `${plural(notReady, 'pessoa ainda não marcou', 'pessoas ainda não marcaram')} que a fita está pronta. ` : 'Todo mundo pronto. ') + `${plural(total, 'faixa', 'faixas')} nesta partida.` };
+      if (ps.length < 2) return { ok: false, why: 'start.needPlayer' };
+      if (ps.filter((p) => p.songs.length > 0).length < 2) return { ok: false, why: 'start.needSongs' };
+      const uniq = new Set(); ps.forEach((p) => p.songs.forEach((s) => uniq.add(s.id)));
+      if (uniq.size < 3) return { ok: false, why: 'start.needThree' };
+      const total = this.settings.rounds === 0 ? uniq.size : Math.min(this.settings.rounds, uniq.size);
+      return { ok: true, notReady: ps.filter((p) => !p.ready).length, total };
     },
     start() {
       if (this.phase !== 'lobby' || !this.canStart().ok) return;
@@ -982,7 +1272,7 @@ function makeHost() {
     },
     toLobby() {
       clearTimeout(this.timer);
-      for (const [id, p] of [...this.players]) { if (!p.connected) { this.players.delete(id); } }
+      for (const [id, p] of [...this.players]) { if (!p.connected) this.players.delete(id); }
       this.order = this.order.filter((id) => this.players.has(id));
       for (const p of this.players.values()) { p.score = 0; p.ready = false; }
       this.phase = 'lobby'; this.rounds = []; this.idx = -1; this.reveal = null; this.end = null; this.votes = new Map();
@@ -1023,10 +1313,22 @@ function onState(st) {
   else S.deadline = 0;
   const me = st.players.find((p) => p.id === myPid);
   document.documentElement.style.setProperty('--me', me ? me.color : COLORS[0]);
-  if (st.phase === 'lobby') { show('lobby'); renderLobby(prev); spStop(); }
-  else if (st.phase === 'round' || st.phase === 'reveal') { show('game'); renderGame(prev); }
-  else { show('end'); renderEnd(); spStop(); }
+  render(prev);
+  if (st.phase === 'lobby' || st.phase === 'end') spStop();
   tick();
+}
+function render(prev) {
+  const st = S.pub; if (!st) return;
+  if (st.phase === 'lobby') { show('lobby'); renderLobby(prev); }
+  else if (st.phase === 'round' || st.phase === 'reveal') { show('game'); renderGame(prev); }
+  else { show('end'); renderEnd(); }
+}
+function setLang(lang) {
+  LANG = lang === 'pt' ? 'pt' : 'en'; ls.set('wt-lang', LANG);
+  applyStatic(); paintMsg('home'); paintMsg('paste'); paintBanner(); renderMySongs();
+  if (S.pub) render(S.pub); // prev === current: repaint only, no round reset
+  if (!SP.ctrl) $('#sp-status').textContent = t(SP.api ? 'sp.hint' : 'sp.loading');
+  else $('#sp-status').textContent = t('sp.hint');
 }
 
 function renderLobby(prev) {
@@ -1037,10 +1339,12 @@ function renderLobby(prev) {
   $('#player-list').replaceChildren(...st.players.map((p) => {
     const li = document.createElement('li');
     li.className = 'prow' + (p.connected ? '' : ' off'); li.style.setProperty('--c', p.color);
-    li.innerHTML = `<span class="dot"></span><span class="pname"></span><span class="pmeta">${plural(p.songs, 'música', 'músicas')}</span><span class="pready${p.ready ? ' yes' : ''}">${p.ready ? 'pronto' : 'montando'}</span>`;
+    li.innerHTML = `<span class="dot"></span><span class="pname"></span><span class="pmeta"></span><span class="pready${p.ready ? ' yes' : ''}"></span>`;
     const nm = li.querySelector('.pname'); nm.textContent = p.name;
-    if (p.id === myPid) nm.insertAdjacentHTML('beforeend', ' <em>(você)</em>');
-    if (p.host) nm.insertAdjacentHTML('beforeend', ' <span class="tag">host</span>');
+    if (p.id === myPid) { const em = document.createElement('em'); em.textContent = ' ' + t('room.you'); nm.append(em); }
+    if (p.host) { const tag = document.createElement('span'); tag.className = 'tag'; tag.textContent = t('room.host'); nm.append(' ', tag); }
+    li.querySelector('.pmeta').textContent = t('songs', { n: p.songs });
+    li.querySelector('.pready').textContent = t(p.ready ? 'room.ready' : 'room.picking');
     return li;
   }));
   const me = st.players.find((p) => p.id === myPid);
@@ -1049,11 +1353,17 @@ function renderLobby(prev) {
   $('#set-secs').value = String(st.settings.seconds);
   $('#set-rounds').disabled = !isHost; $('#set-secs').disabled = !isHost;
   $('#start-btn').hidden = !isHost;
-  $('#start-btn').disabled = !(st.canStart && st.canStart.ok);
-  $('#start-why').textContent = isHost ? (st.canStart ? st.canStart.why : '') : 'Quem criou a sala escolhe as opções e começa a partida.';
+  const cs = st.canStart || { ok: false, why: 'start.needPlayer' };
+  $('#start-btn').disabled = !cs.ok;
+  let why = '';
+  if (!isHost) why = t('match.guest');
+  else if (!cs.ok) why = t(cs.why);
+  else why = (cs.notReady ? t('start.notReady', { n: cs.notReady }) : t('start.allReady')) + t('start.tracks', { n: cs.total });
+  $('#start-why').textContent = why;
 }
 
 function playerById(id) { return S.pub.players.find((p) => p.id === id); }
+function displayName(p) { return p.id === myPid ? p.name + ' ' + t('room.you') : p.name; }
 
 function renderGame(prev) {
   const st = S.pub; const r = st.round; const isHost = S.role === 'host';
@@ -1065,11 +1375,11 @@ function renderGame(prev) {
   if (r.myVote && !S.locked) { S.locked = true; S.picks = new Set(r.myVote); }
 
   const half = Math.ceil(r.total / 2); const sideB = r.n > half; const no = sideB ? r.n - half : r.n;
-  $('#side-label').firstChild.textContent = `Lado ${sideB ? 'B' : 'A'} · Faixa ${pad2(no)}`;
-  $('#round-of').textContent = `${r.n} de ${r.total}`;
+  $('#side-text').textContent = t('game.side', { side: sideB ? 'B' : 'A', no: pad2(no) });
+  $('#round-of').textContent = t('game.of', { n: r.n, total: r.total });
   $('#cass-side').textContent = sideB ? 'B' : 'A';
-  $('#cass-of').textContent = `FAIXA ${r.n} DE ${r.total}`;
-  $('#track-title').textContent = r.title || 'Faixa misteriosa';
+  $('#cass-of').textContent = t('game.trackOf', { n: r.n, total: r.total });
+  $('#track-title').textContent = r.title || t('game.mystery');
   const img = $('#track-thumb');
   if (r.thumb) { if (img.getAttribute('src') !== r.thumb) img.src = r.thumb; img.hidden = false; $('#track-ph').hidden = true; }
   else { img.hidden = true; $('#track-ph').hidden = false; }
@@ -1103,17 +1413,17 @@ function renderRoundPanel() {
   if (focused) { const f = $(`.pick[data-pid="${CSS.escape(focused)}"]`); if (f && !f.disabled) f.focus(); }
   const lock = $('#lock-btn');
   lock.disabled = S.locked || (!r.mine && S.picks.size === 0);
-  lock.textContent = S.locked ? 'Palpite cravado' : (r.mine && S.picks.size === 0 ? 'Confirmar: só eu tenho essa' : 'Cravar palpite');
+  lock.textContent = t(S.locked ? 'game.locked' : (r.mine && S.picks.size === 0 ? 'game.onlyMe' : 'game.lock'));
   const live = st.players.filter((p) => p.connected);
   const voted = new Set(r.voted);
   const vs = $('#vote-status');
   vs.replaceChildren();
   const label = document.createElement('span');
-  label.textContent = `${live.filter((p) => voted.has(p.id)).length} de ${live.length} cravaram:`;
+  label.textContent = t('game.voted', { n: live.filter((p) => voted.has(p.id)).length, m: live.length });
   vs.append(label);
   for (const p of live) {
     const c = document.createElement('span'); c.className = 'vchip' + (voted.has(p.id) ? ' done' : ''); c.style.setProperty('--c', p.color);
-    c.innerHTML = '<span class="dot"></span><span></span>'; c.lastChild.textContent = p.id === myPid ? 'você' : p.name;
+    c.innerHTML = '<span class="dot"></span><span></span>'; c.lastChild.textContent = p.id === myPid ? t('game.youChip') : p.name;
     vs.append(c);
   }
 }
@@ -1121,10 +1431,10 @@ function renderRoundPanel() {
 function renderReveal() {
   const st = S.pub; const rv = st.reveal; const r = st.round; const isHost = S.role === 'host';
   const owners = rv.owners.map(playerById).filter(Boolean);
-  $('#reveal-title').textContent = owners.length > 1 ? 'Essa estava em mais de uma fita' : 'Essa era de…';
+  $('#reveal-title').textContent = t(owners.length > 1 ? 'rev.multi' : 'rev.single');
   $('#owners').replaceChildren(...owners.map((p) => {
     const o = document.createElement('span'); o.className = 'owner'; o.style.setProperty('--c', p.color);
-    o.innerHTML = '<span class="dot"></span><span></span>'; o.lastChild.textContent = p.id === myPid ? p.name + ' (você)' : p.name;
+    o.innerHTML = '<span class="dot"></span><span></span>'; o.lastChild.textContent = displayName(p);
     return o;
   }));
   const ownerSet = new Set(rv.owners);
@@ -1132,33 +1442,33 @@ function renderReveal() {
     const p = playerById(row.id); if (!p) return document.createComment('');
     const li = document.createElement('li'); li.className = 'rrow';
     li.innerHTML = `<div class="who"><span class="dot" style="--c:${esc(p.color)}"></span><span></span></div><div class="delta ${row.delta > 0 ? 'pos' : 'zero'}">${row.delta > 0 ? '+' : ''}${row.delta}</div><div class="detail"></div>`;
-    li.querySelector('.who span:last-child').textContent = p.id === myPid ? p.name + ' (você)' : p.name;
+    li.querySelector('.who span:last-child').textContent = displayName(p);
     const d = li.querySelector('.detail');
-    if (row.owner) { const b = document.createElement('span'); b.className = 'badge'; b.textContent = 'tinha a música'; d.append(b); }
-    if (!row.voted) { const s = document.createElement('span'); s.textContent = 'não palpitou'; d.append(s); }
-    else if (!row.picks.length) { const s = document.createElement('span'); s.textContent = 'não marcou ninguém'; d.append(s); }
+    const add = (cls, text) => { const s = document.createElement('span'); if (cls) s.className = cls; s.textContent = text; d.append(s); };
+    if (row.owner) add('badge', t('rev.had'));
+    if (!row.voted) add('', t('rev.noGuess'));
+    else if (!row.picks.length) add('', t('rev.nobody'));
     for (const id of row.picks) {
       const q = playerById(id); if (!q) continue;
-      const c = document.createElement('span'); const hit = ownerSet.has(id);
-      c.className = 'gchip ' + (hit ? 'hit' : 'miss'); c.textContent = (hit ? '✓ ' : '✗ ') + q.name;
-      d.append(c);
+      const hit = ownerSet.has(id);
+      add('gchip ' + (hit ? 'hit' : 'miss'), (hit ? '✓ ' : '✗ ') + q.name);
     }
-    if (row.exact) { const b = document.createElement('span'); b.className = 'badge gold'; b.textContent = 'na mosca'; d.append(b); }
-    if (row.fooled) { const s = document.createElement('span'); s.textContent = `enganou ${row.fooled}`; d.append(s); }
+    if (row.exact) add('badge gold', t('rev.exact'));
+    if (row.fooled) add('', t('rev.fooled', { n: row.fooled }));
     return li;
   }));
   renderBoard($('#board'));
   const last = r.n === r.total;
   $('#next-btn').hidden = !isHost;
-  $('#next-btn').textContent = last ? 'Ver o placar final' : 'Próxima faixa';
-  $('#next-wait').textContent = isHost ? '' : (last ? 'Última faixa. Esperando o host abrir o placar final…' : 'Esperando o host soltar a próxima faixa…');
+  $('#next-btn').textContent = t(last ? 'rev.final' : 'rev.next');
+  $('#next-wait').textContent = isHost ? '' : t(last ? 'rev.waitLast' : 'rev.wait');
 }
 
 function renderBoard(ol) {
   const ps = [...S.pub.players].sort((a, b) => b.score - a.score);
   ol.replaceChildren(...ps.map((p, i) => {
     const li = document.createElement('li'); if (p.id === myPid) li.className = 'me';
-    li.innerHTML = `<span class="rk">${i + 1}º</span><span class="dot" style="--c:${esc(p.color)}"></span><span class="nm"></span><span class="sc">${p.score}</span>`;
+    li.innerHTML = `<span class="rk">${i + 1}</span><span class="dot" style="--c:${esc(p.color)}"></span><span class="nm"></span><span class="sc">${p.score}</span>`;
     li.querySelector('.nm').textContent = p.name;
     return li;
   }));
@@ -1169,16 +1479,16 @@ function renderEnd() {
   const ps = [...st.players].sort((a, b) => b.score - a.score);
   $('#podium').replaceChildren(...ps.map((p, i) => {
     const li = document.createElement('li'); li.style.setProperty('--c', p.color);
-    li.innerHTML = `<span class="pos">${i + 1}º</span><span class="nm"></span><span class="sc">${p.score}</span>`;
-    li.querySelector('.nm').textContent = p.id === myPid ? p.name + ' (você)' : p.name;
+    li.innerHTML = `<span class="pos">${i + 1}</span><span class="nm"></span><span class="sc">${p.score}</span>`;
+    li.querySelector('.nm').textContent = displayName(p);
     return li;
   }));
-  const names = (ids) => ids.map((id) => (playerById(id) || {}).name).filter(Boolean).join(' e ');
+  const names = (ids) => ids.map((id) => (playerById(id) || {}).name).filter(Boolean).join(t('aw.and'));
   const awards = [];
   const e = st.end || {};
-  if (e.detective) awards.push({ lbl: 'Detetive', who: names(e.detective.ids), why: `Acertou ${plural(e.detective.n, 'dono de música', 'donos de música')}.` });
-  if (e.poker) awards.push({ lbl: 'Cara de paisagem', who: names(e.poker.ids), why: `Passou despercebido ${plural(e.poker.n, 'vez', 'vezes')} com as próprias músicas.` });
-  if (e.twins) awards.push({ lbl: 'Fones gêmeos', who: names(e.twins.ids), why: `${plural(e.twins.n, 'música', 'músicas')} em comum nas fitas.` });
+  if (e.detective) awards.push({ lbl: t('aw.det'), who: names(e.detective.ids), why: t('aw.detWhy', { n: e.detective.n }) });
+  if (e.poker) awards.push({ lbl: t('aw.poker'), who: names(e.poker.ids), why: t('aw.pokerWhy', { n: e.poker.n }) });
+  if (e.twins) awards.push({ lbl: t('aw.twins'), who: names(e.twins.ids), why: t('aw.twinsWhy', { n: e.twins.n }) });
   $('#awards').replaceChildren(...awards.map((a) => {
     const c = document.createElement('section'); c.className = 'card award';
     c.innerHTML = '<span class="lbl"></span><p></p><small></small>';
@@ -1186,7 +1496,7 @@ function renderEnd() {
     return c;
   }));
   $('#again-btn').hidden = !isHost;
-  $('#again-wait').textContent = isHost ? '' : 'Se o host quiser outra rodada, você volta pra sala automaticamente.';
+  $('#again-wait').textContent = isHost ? '' : t('end.againWait');
 }
 
 /* ============ timer ============ */
@@ -1212,7 +1522,7 @@ const SP = { api: null, ctrl: null, creating: false, current: null, want: null, 
 window.onSpotifyIframeApiReady = (api) => { SP.api = api; if (SP.want && S.playHere) spLoad(SP.want); };
 function spLoad(id) {
   SP.want = id;
-  if (!SP.api) { $('#sp-status').textContent = 'Carregando o player do Spotify…'; return; }
+  if (!SP.api) { $('#sp-status').textContent = t('sp.loading'); return; }
   const uri = 'spotify:track:' + id;
   if (!SP.ctrl) {
     if (SP.creating) return;
@@ -1223,7 +1533,7 @@ function spLoad(id) {
       SP.ctrl = ctrl; SP.creating = false; SP.current = id; SP.playOnReady = true;
       ctrl.addListener('ready', () => { if (SP.playOnReady) { SP.playOnReady = false; try { ctrl.play(); } catch (e) { /* user can press play */ } } });
       ctrl.addListener('playback_update', (ev) => { SP.playing = !!(ev && ev.data && !ev.data.isPaused); reels(); });
-      $('#sp-status').textContent = 'Se a música não começar sozinha, aperte o play no player.';
+      $('#sp-status').textContent = t('sp.hint');
       if (SP.want !== id) spLoad(SP.want);
     });
   } else if (SP.current !== id) {
@@ -1248,6 +1558,7 @@ $('#join-btn').addEventListener('click', () => joinRoom($('#code-input').value))
 $('#code-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') joinRoom($('#code-input').value); });
 $('#name-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') { const code = $('#code-input').value.trim(); if (code) joinRoom(code); else createRoom(); } });
 $('#code-input').addEventListener('input', (e) => { e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 5); });
+document.addEventListener('click', (e) => { const b = e.target.closest('.langsw button'); if (b) setLang(b.dataset.lang); });
 
 $('#add-btn').addEventListener('click', () => addFromText($('#paste').value));
 $('#paste').addEventListener('paste', () => setTimeout(() => addFromText($('#paste').value), 0));
@@ -1256,21 +1567,25 @@ $('#song-list').addEventListener('click', (e) => {
   S.songs = S.songs.filter((s) => s.id !== b.dataset.id);
   saveSongs(); renderMySongs(); sendSongsSoon();
 });
-let clearArmed = 0;
 $('#clear-songs').addEventListener('click', (e) => {
   if (!S.songs.length) return;
-  if (!clearArmed) { e.target.textContent = 'Clique de novo pra apagar'; clearArmed = setTimeout(() => { clearArmed = 0; e.target.textContent = 'Apagar todas'; }, 3000); return; }
-  clearTimeout(clearArmed); clearArmed = 0; e.target.textContent = 'Apagar todas';
+  if (!clearArmed) {
+    e.target.textContent = t('tape.clearConfirm');
+    clearArmed = setTimeout(() => { clearArmed = 0; e.target.textContent = t('tape.clear'); }, 3000);
+    return;
+  }
+  clearTimeout(clearArmed); clearArmed = 0; e.target.textContent = t('tape.clear');
   S.songs = []; saveSongs(); renderMySongs(); sendSongsSoon();
 });
 $('#ready-box').addEventListener('change', (e) => { S.ready = e.target.checked; sendHost({ t: 'ready', v: S.ready }); });
-$('#set-rounds').addEventListener('change', () => sendHost({ t: 'settings', rounds: Number($('#set-rounds').value), seconds: Number($('#set-secs').value) }));
-$('#set-secs').addEventListener('change', () => sendHost({ t: 'settings', rounds: Number($('#set-rounds').value), seconds: Number($('#set-secs').value) }));
+const sendSettings = () => sendHost({ t: 'settings', rounds: Number($('#set-rounds').value), seconds: Number($('#set-secs').value) });
+$('#set-rounds').addEventListener('change', sendSettings);
+$('#set-secs').addEventListener('change', sendSettings);
 $('#start-btn').addEventListener('click', () => sendHost({ t: 'start' }));
 $('#copy-link').addEventListener('click', async () => {
   const link = inviteLink();
-  try { await navigator.clipboard.writeText(link); toast('Link copiado. Manda no grupo!'); }
-  catch (e) { toast('Copie este link: ' + link); }
+  try { await navigator.clipboard.writeText(link); toast(t('toast.copied')); }
+  catch (e) { toast(t('toast.copyThis', { link })); }
 });
 $('#leave-lobby').addEventListener('click', leave);
 $('#leave-end').addEventListener('click', leave);
@@ -1282,7 +1597,7 @@ $('#pick-grid').addEventListener('click', (e) => {
   renderRoundPanel();
 });
 $('#lock-btn').addEventListener('click', () => {
-  const r = S.pub && S.pub.round; if (!r || S.locked) return;
+  const r = S.pub && S.pub.round; if (!r || S.locked || S.pub.phase !== 'round') return;
   S.locked = true;
   sendHost({ t: 'vote', n: r.n, picks: [...S.picks] });
   renderRoundPanel();
@@ -1291,7 +1606,7 @@ $('#reveal-now').addEventListener('click', () => sendHost({ t: 'reveal' }));
 $('#next-btn').addEventListener('click', () => sendHost({ t: 'next' }));
 $('#again-btn').addEventListener('click', () => sendHost({ t: 'lobby' }));
 $('#play-here').addEventListener('change', (e) => {
-  S.playHere = e.target.checked; ls.set('fa-play', S.playHere);
+  S.playHere = e.target.checked; ls.set('wt-play', S.playHere);
   $('.player-box').hidden = !S.playHere;
   if (S.playHere && S.pub && S.pub.round) spLoad(S.pub.round.trackId); else spStop();
   reels();
@@ -1301,16 +1616,18 @@ window.addEventListener('beforeunload', (e) => {
   if (S.role === 'host' && S.pub && S.pub.players.length > 1) { e.preventDefault(); e.returnValue = ''; }
 });
 
-// Invite link: ?sala=CODE
+// Boot: translate, then handle an invite link (?sala=CODE).
+applyStatic();
+$('#sp-status').textContent = t('sp.hint');
+renderMySongs();
 (() => {
   let code = '';
   try { code = (new URL(location.href).searchParams.get('sala') || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 5); } catch (e) { /* ignore */ }
   if (code) {
     $('#code-input').value = code;
-    homeMsg('Você foi convidado pra sala ' + code + '. Coloque seu nome e clique em Entrar.');
+    setMsg('home', 'home.invited', { code });
     (S.name ? $('#join-btn') : $('#name-input')).focus();
   }
-  renderMySongs();
 })();
 </script>
 <script src="https://open.spotify.com/embed/iframe-api/v1" async></script>

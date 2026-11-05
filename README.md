@@ -1,21 +1,21 @@
-# Fone Alheio
+# Whose Track?
 
-Jogo musical para jogar com amigos: cada pessoa cola links de músicas do Spotify, o jogo toca uma de cada vez e todo mundo tenta adivinhar de quem é.
+A music party game for friends: everyone pastes links to Spotify songs, the game plays them one at a time, and the group guesses whose song each one is. Available in English and Portuguese (EN/PT switch on every screen).
 
-- Um arquivo só (`index.html`), sem servidor próprio.
-- Multiplayer de navegador para navegador com [PeerJS](https://peerjs.com/). O navegador de quem cria a sala faz o papel de servidor: se ele fechar a aba, a partida acaba.
-- Áudio pelo player oficial do Spotify (prévia de 30 s, ou a faixa inteira para quem está logado no Spotify no navegador).
+- A single file (`index.html`), no server of its own.
+- Browser-to-browser multiplayer with [PeerJS](https://peerjs.com/). The host's browser acts as the server, so if the host closes the tab the game ends.
+- Audio through Spotify's official embed player (30-second preview, or the full track for anyone signed in to Spotify in that browser).
 
-## Pontos
+## Scoring
 
-- +100 por pessoa certa, −50 por pessoa errada (mínimo 0 na rodada)
-- +50 se acertar exatamente quem tem a música
-- Dono da música: +40 por cada pessoa que não desconfiou dele
+- +100 for each right person, −50 for each wrong one (never below 0 per round)
+- +50 for naming exactly who has the song
+- Song owner: +40 for each player who didn't suspect them
 
-## Rodar localmente
+## Run locally
 
 ```bash
 python -m http.server 8765
 ```
 
-Depois abra http://localhost:8765.
+Then open http://localhost:8765.
