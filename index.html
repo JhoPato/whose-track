@@ -36,6 +36,7 @@
   --font-mono:"Martian Mono",ui-monospace,"Cascadia Mono",Consolas,monospace;
   --radius:10px;
   --me:#ffcf3f;
+  --spotify:#1ed760;
   color-scheme:dark;
 }
 *,*::before,*::after{box-sizing:border-box}
@@ -276,6 +277,21 @@ kbd{font:600 12px/1 var(--font-mono);background:var(--paper-shade);border:1px so
 .banner .btn{box-shadow:none}
 .toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 20px);transform:translateX(-50%);z-index:40;background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:8px;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,.35);max-width:calc(100% - 32px)}
 
+/* ---------- Spotify sign-in ---------- */
+.spc{display:grid;gap:10px;margin-bottom:16px}
+.spc-row{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:10px}
+.btn.spotify{background:var(--ink);color:var(--paper);box-shadow:0 3px 0 var(--desk-deep)}
+.btn.spotify:active:not(:disabled){box-shadow:0 1px 0 var(--desk-deep)}
+.spdot{width:12px;height:12px;border-radius:50%;background:var(--spotify);flex:none}
+.spc-note{font-size:13px;color:var(--ink-soft)}
+.spc .or{display:flex;align-items:center;gap:10px;margin-top:6px;font:700 12px/1 var(--font-body);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
+.spc .or::before,.spc .or::after{content:"";flex:1;height:2px;background:var(--rule)}
+.cb-card{max-width:460px;margin:10vh auto 0;display:grid;gap:14px}
+.cb-card .logo{color:var(--ink)}
+.cb-card .logo b{color:var(--ink);text-decoration:underline;text-decoration-color:var(--accent);text-decoration-thickness:4px}
+.cb-text{font-size:18px}
+.cb-text.err{color:var(--bad);font-weight:700}
+
 /* ---------- language switch ---------- */
 .langsw{display:inline-flex;flex:none;border:2px solid var(--on-desk-soft);border-radius:8px;overflow:hidden}
 .langsw button{background:transparent;border:0;color:var(--on-desk-soft);font:700 12px/1 var(--font-mono);letter-spacing:.08em;padding:8px 10px;cursor:pointer}
@@ -372,6 +388,28 @@ kbd{font:600 12px/1 var(--font-mono);background:var(--paper-shade);border:1px so
       <div class="stripe"></div>
       <h2 id="tape-h"><span data-i18n="tape.title"></span> <small id="my-count"></small></h2>
       <p class="intro" data-i18n="tape.intro"></p>
+      <div class="spc" id="sp-connect-box" hidden>
+        <div class="spc-row">
+          <div class="field">
+            <label for="sp-range" data-i18n="spc.range"></label>
+            <select id="sp-range">
+              <option value="short_term" data-i18n="spc.short"></option>
+              <option value="medium_term" data-i18n="spc.medium" selected></option>
+              <option value="long_term" data-i18n="spc.long"></option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="sp-count" data-i18n="spc.count"></label>
+            <select id="sp-count">
+              <option value="10">10</option><option value="15" selected>15</option><option value="20">20</option><option value="30">30</option><option value="50">50</option>
+            </select>
+          </div>
+        </div>
+        <a class="btn spotify big" id="sp-connect" href="#" target="_blank"><span class="spdot" aria-hidden="true"></span><span data-i18n="spc.btn"></span></a>
+        <p class="msg" id="spc-msg" role="status"></p>
+        <p class="spc-note" data-i18n="spc.note"></p>
+        <div class="or" data-i18n="spc.orPaste"></div>
+      </div>
       <div class="field">
         <label for="paste" data-i18n="tape.links"></label>
         <textarea id="paste" placeholder="https://open.spotify.com/track/..."></textarea>
@@ -528,6 +566,16 @@ kbd{font:600 12px/1 var(--font-mono);background:var(--paper-shade);border:1px so
   </div>
 </main>
 
+<!-- ================= SPOTIFY SIGN-IN WINDOW ================= -->
+<main class="wrap" data-screen="spotify" hidden>
+  <section class="card cb-card">
+    <div class="stripe" style="--c:var(--spotify)"></div>
+    <span class="logo"><svg aria-hidden="true"><use href="#i-cass"/></svg>Whose <b>Track?</b></span>
+    <p class="cb-text" id="cb-text" role="status"></p>
+    <div id="cb-close" hidden><button class="btn primary" id="cb-close-btn" type="button" data-i18n="cb.close"></button></div>
+  </section>
+</main>
+
 <div class="banner" id="banner" role="alert" hidden><span class="grow" id="banner-text"></span><span id="banner-actions" style="display:flex;gap:8px"></span></div>
 <div class="toast" id="toast" role="status" hidden></div>
 
@@ -547,6 +595,11 @@ const CODE_CHARS = 'BCDFGHJKLMNPQRSTVWXZ23456789';
 const ROUND_OPTS = [8, 12, 16, 20, 0];
 const SECS_OPTS = [20, 30, 45, 60, 0];
 const TRACK_ID = /^[A-Za-z0-9]{22}$/;
+// Optional "pull my top songs" sign-in. Public Client ID from developer.spotify.com (not a secret).
+// Leave empty to hide the Spotify button; everyone then pastes links.
+const SPOTIFY_CLIENT_ID = '';
+const SP_RANGES = ['short_term', 'medium_term', 'long_term'];
+const SP_COUNTS = [10, 15, 20, 30, 50];
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -692,6 +745,25 @@ const I18N = {
     'ban.reconnect': 'Reconnect',
     'ban.leave': 'Leave',
     'ban.retry': 'Try again',
+    'spc.btn': 'Pull my top songs from Spotify',
+    'spc.range': 'Listening period',
+    'spc.short': 'Last 4 weeks',
+    'spc.medium': 'Last 6 months',
+    'spc.long': 'Last 12 months',
+    'spc.count': 'How many',
+    'spc.note': 'Only works for Spotify accounts on this game’s guest list (up to 5 people). Everyone else can paste links below.',
+    'spc.orPaste': 'or paste links',
+    'spc.waiting': 'Finish signing in on the Spotify tab, then come back here.',
+    'spc.added': ['{n} song added from your Spotify', '{n} songs added from your Spotify'],
+    'spc.noneNew': 'Those songs were already on your tape.',
+    'spc.err.denied': 'Spotify sign-in was cancelled.',
+    'spc.err.notListed': 'This Spotify account isn’t on the game’s guest list yet. Ask the game’s owner to add your Spotify email, or paste links instead.',
+    'spc.err.expired': 'This sign-in expired. Go back to the game and try again.',
+    'spc.err.empty': 'Spotify has no top songs for that period yet. Try a longer period.',
+    'spc.err.failed': 'Couldn’t get your songs from Spotify. Try again, or paste links instead.',
+    'cb.loading': 'Getting your top songs…',
+    'cb.done': 'Done! Your songs are on your tape. You can close this tab and go back to the game.',
+    'cb.close': 'Close this tab',
   },
   pt: {
     'lang.group': 'Idioma',
@@ -820,6 +892,25 @@ const I18N = {
     'ban.reconnect': 'Reconectar',
     'ban.leave': 'Sair',
     'ban.retry': 'Tentar de novo',
+    'spc.btn': 'Puxar minhas mais ouvidas do Spotify',
+    'spc.range': 'Período',
+    'spc.short': 'Últimas 4 semanas',
+    'spc.medium': 'Últimos 6 meses',
+    'spc.long': 'Últimos 12 meses',
+    'spc.count': 'Quantas',
+    'spc.note': 'Só funciona pra contas do Spotify na lista de convidados do jogo (até 5 pessoas). Os outros podem colar links aqui embaixo.',
+    'spc.orPaste': 'ou cole links',
+    'spc.waiting': 'Termine o login na aba do Spotify e depois volte pra cá.',
+    'spc.added': ['{n} música adicionada do seu Spotify', '{n} músicas adicionadas do seu Spotify'],
+    'spc.noneNew': 'Essas músicas já estavam na sua fita.',
+    'spc.err.denied': 'O login no Spotify foi cancelado.',
+    'spc.err.notListed': 'Essa conta do Spotify ainda não está na lista de convidados do jogo. Peça pro dono do jogo cadastrar seu e-mail do Spotify, ou cole links.',
+    'spc.err.expired': 'Esse login expirou. Volte pro jogo e tente de novo.',
+    'spc.err.empty': 'O Spotify ainda não tem mais ouvidas nesse período. Tente um período maior.',
+    'spc.err.failed': 'Não consegui pegar suas músicas do Spotify. Tente de novo ou cole links.',
+    'cb.loading': 'Pegando suas mais ouvidas…',
+    'cb.done': 'Pronto! Suas músicas estão na fita. Pode fechar esta aba e voltar pro jogo.',
+    'cb.close': 'Fechar esta aba',
   },
 };
 let LANG = ls.get('wt-lang', 'en') === 'pt' ? 'pt' : 'en';
@@ -874,7 +965,7 @@ let clearArmed = 0;
 function show(name) { $$('[data-screen]').forEach((el) => { el.hidden = el.dataset.screen !== name; }); }
 
 // Messages keep their key so a language switch can repaint them.
-const MSG = { home: null, paste: null };
+const MSG = { home: null, paste: null, spc: null };
 function setMsg(where, key, vars, isErr) { MSG[where] = key ? { key, vars, isErr } : null; paintMsg(where); }
 function paintMsg(where) {
   const el = $('#' + where + '-msg'); const m = MSG[where];
@@ -975,6 +1066,114 @@ function renderMySongs() {
   const n = S.songs.filter((s) => !s.bad).length;
   $('#my-count').textContent = t('songs', { n });
   $('#song-empty').hidden = S.songs.length > 0;
+}
+
+/* ============ optional Spotify sign-in: pull the player's top songs ============ */
+// Sign-in runs in a pop-up so the room connection on this page survives. The pop-up comes back
+// to this same page (callback mode), trades the code for a token (PKCE, no secret), reads
+// /me/top/tracks once and hands the songs back over a BroadcastChannel. No token is stored.
+const SPOT = { pending: null, bc: null };
+const spotifyOn = () => !!SPOTIFY_CLIENT_ID && !!(window.crypto && crypto.subtle);
+function spRedirectUri() { return location.origin + location.pathname.replace(/index\.html$/, ''); }
+function b64url(bytes) { let s = ''; bytes.forEach((b) => { s += String.fromCharCode(b); }); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+async function makePkce() {
+  const verifier = b64url(crypto.getRandomValues(new Uint8Array(48)));
+  const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier)));
+  return { verifier, challenge: b64url(digest) };
+}
+function spChannel() { if (!SPOT.bc && 'BroadcastChannel' in window) SPOT.bc = new BroadcastChannel('wt-spotify'); return SPOT.bc; }
+
+// The button is a real link (target=_blank) with the sign-in URL prepared in advance:
+// pop-up blockers leave plain links alone, and this page never navigates away from the room.
+async function prepareSpotifyLink() {
+  const { verifier, challenge } = await makePkce();
+  const state = b64url(crypto.getRandomValues(new Uint8Array(16)));
+  const q = new URLSearchParams({
+    client_id: SPOTIFY_CLIENT_ID, response_type: 'code', redirect_uri: spRedirectUri(),
+    scope: 'user-top-read', state, code_challenge_method: 'S256', code_challenge: challenge,
+  });
+  SPOT.prepared = { state, verifier };
+  $('#sp-connect').href = 'https://accounts.spotify.com/authorize?' + q.toString();
+}
+function onSpotifyClick(e) {
+  const prep = SPOT.prepared;
+  if (!prep) { e.preventDefault(); return; }
+  const range = SP_RANGES.includes($('#sp-range').value) ? $('#sp-range').value : 'medium_term';
+  const count = SP_COUNTS.includes(Number($('#sp-count').value)) ? Number($('#sp-count').value) : 15;
+  ls.set('wt-sp-auth', { state: prep.state, verifier: prep.verifier, range, count, redirect: spRedirectUri(), lang: LANG, ts: Date.now() });
+  SPOT.pending = prep.state; SPOT.prepared = null;
+  setMsg('spc', 'spc.waiting');
+  setTimeout(() => { prepareSpotifyLink().catch(() => { /* button stays inert */ }); }, 500);
+}
+function onSpotifyResult(msg) {
+  if (!msg || msg.type !== 'wt-spotify' || !SPOT.pending || msg.state !== SPOT.pending) return;
+  SPOT.pending = null;
+  try { localStorage.removeItem('wt-sp-result'); } catch (e) { /* ignore */ }
+  if (msg.error) { setMsg('spc', 'spc.err.' + (['denied', 'notListed', 'expired', 'empty'].includes(msg.error) ? msg.error : 'failed'), null, true); return; }
+  addTracks(msg.tracks);
+}
+function addTracks(list) {
+  const clean = sanitizeSongs(list);
+  const have = new Set(S.songs.map((s) => s.id));
+  let added = 0, dup = 0, cut = 0;
+  for (const s of clean) {
+    if (have.has(s.id)) { dup++; continue; }
+    if (S.songs.length >= MAX_SONGS) { cut++; continue; }
+    have.add(s.id); S.songs.push({ ...s, done: true }); added++;
+    metaCache.set(s.id, { title: s.title, thumb: s.thumb, bad: false });
+  }
+  setMsg('spc', () => {
+    if (!added) return t('spc.noneNew');
+    const parts = [t('spc.added', { n: added })];
+    if (dup) parts.push(t('paste.dup', { n: dup }));
+    if (cut) parts.push(t('paste.cut', { n: cut, max: MAX_SONGS }));
+    return parts.join(' · ') + '.';
+  });
+  saveSongs(); renderMySongs(); sendSongsSoon();
+}
+function pickThumb(images) {
+  if (!Array.isArray(images) || !images.length) return '';
+  const sorted = images.filter((i) => i && i.url).sort((a, b) => (a.width || 0) - (b.width || 0));
+  const img = sorted.find((i) => (i.width || 0) >= 64) || sorted[sorted.length - 1];
+  return img ? safeThumb(img.url) : '';
+}
+// Callback mode: this page was opened by Spotify's redirect inside the pop-up.
+async function runSpotifyCallback(params) {
+  const auth = ls.get('wt-sp-auth', null);
+  if (auth && auth.lang) LANG = auth.lang === 'pt' ? 'pt' : 'en';
+  applyStatic(); show('spotify');
+  const status = (key, isErr) => { const el = $('#cb-text'); el.textContent = t(key); el.classList.toggle('err', !!isErr); };
+  const send = (payload) => {
+    try { const bc = spChannel(); if (bc) bc.postMessage(payload); } catch (e) { /* ignore */ }
+    try { localStorage.setItem('wt-sp-result', JSON.stringify(payload)); } catch (e) { /* ignore */ }
+    try { localStorage.removeItem('wt-sp-auth'); } catch (e) { /* ignore */ }
+    try { history.replaceState(null, '', spRedirectUri()); } catch (e) { /* ignore */ }
+    $('#cb-close').hidden = false;
+  };
+  const fail = (code) => { status('spc.err.' + code, true); send({ type: 'wt-spotify', state: params.get('state'), error: code }); };
+  if (params.get('error')) { fail(params.get('error') === 'access_denied' ? 'denied' : 'failed'); return; }
+  if (!auth || auth.state !== params.get('state') || Date.now() - auth.ts > 15 * 60 * 1000) { fail('expired'); return; }
+  status('cb.loading');
+  try {
+    const tok = await fetch('https://accounts.spotify.com/api/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ grant_type: 'authorization_code', code: params.get('code') || '', redirect_uri: auth.redirect, client_id: SPOTIFY_CLIENT_ID, code_verifier: auth.verifier }),
+    });
+    if (!tok.ok) { fail(tok.status === 403 ? 'notListed' : 'failed'); return; }
+    const token = (await tok.json()).access_token;
+    const range = SP_RANGES.includes(auth.range) ? auth.range : 'medium_term';
+    const count = SP_COUNTS.includes(auth.count) ? auth.count : 15;
+    const res = await fetch(`https://api.spotify.com/v1/me/top/tracks?time_range=${range}&limit=${count}`, { headers: { Authorization: 'Bearer ' + token } });
+    if (res.status === 403) { fail('notListed'); return; }
+    if (!res.ok) { fail('failed'); return; }
+    const data = await res.json();
+    const tracks = (data.items || []).filter((tr) => tr && TRACK_ID.test(tr.id)).map((tr) => ({ id: tr.id, title: String(tr.name || ''), thumb: pickThumb(tr.album && tr.album.images) }));
+    if (!tracks.length) { fail('empty'); return; }
+    status('cb.done');
+    send({ type: 'wt-spotify', state: auth.state, tracks });
+    setTimeout(() => { try { window.close(); } catch (e) { /* user closes it */ } }, 1200);
+  } catch (e) { fail('failed'); }
 }
 
 /* ============ networking ============ */
@@ -1325,7 +1524,7 @@ function render(prev) {
 }
 function setLang(lang) {
   LANG = lang === 'pt' ? 'pt' : 'en'; ls.set('wt-lang', LANG);
-  applyStatic(); paintMsg('home'); paintMsg('paste'); paintBanner(); renderMySongs();
+  applyStatic(); paintMsg('home'); paintMsg('paste'); paintMsg('spc'); paintBanner(); renderMySongs();
   if (S.pub) render(S.pub); // prev === current: repaint only, no round reset
   if (!SP.ctrl) $('#sp-status').textContent = t(SP.api ? 'sp.hint' : 'sp.loading');
   else $('#sp-status').textContent = t('sp.hint');
@@ -1616,11 +1815,22 @@ window.addEventListener('beforeunload', (e) => {
   if (S.role === 'host' && S.pub && S.pub.players.length > 1) { e.preventDefault(); e.returnValue = ''; }
 });
 
-// Boot: translate, then handle an invite link (?sala=CODE).
+$('#sp-connect').addEventListener('click', onSpotifyClick);
+$('#sp-connect').addEventListener('auxclick', (e) => { if (e.button === 1) onSpotifyClick(e); });
+$('#cb-close-btn').addEventListener('click', () => { try { window.close(); } catch (e) { /* ignore */ } });
+const bcIn = spChannel();
+if (bcIn) bcIn.addEventListener('message', (e) => onSpotifyResult(e.data));
+window.addEventListener('storage', (e) => { if (e.key === 'wt-sp-result' && e.newValue) { try { onSpotifyResult(JSON.parse(e.newValue)); } catch (err) { /* ignore */ } } });
+
+// Boot: translate, then either finish a Spotify sign-in (pop-up) or handle an invite link (?sala=CODE).
 applyStatic();
 $('#sp-status').textContent = t('sp.hint');
+$('#sp-connect-box').hidden = !spotifyOn();
 renderMySongs();
 (() => {
+  const qp = new URLSearchParams(location.search);
+  if (spotifyOn() && qp.has('state') && (qp.has('code') || qp.has('error'))) { runSpotifyCallback(qp); return; }
+  if (spotifyOn()) prepareSpotifyLink().catch(() => { $('#sp-connect-box').hidden = true; });
   let code = '';
   try { code = (new URL(location.href).searchParams.get('sala') || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 5); } catch (e) { /* ignore */ }
   if (code) {
